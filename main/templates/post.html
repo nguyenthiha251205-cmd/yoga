@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ post.title }} - SoraYoga{% endblock %}
+
+{% block content %}
+<div id="header-root"></div>
+
+<div class="container mx-auto px-6 py-10">
+    <article class="max-w-3xl mx-auto bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-gray-100">
+        <h1 class="text-3xl md:text-5xl font-bold mb-6 text-[var(--primary-color)] leading-tight">{{ post.title }}</h1>
+        
+        <div class="flex items-center text-sm text-gray-500 mb-8 border-b pb-6">
+            <span class="mr-4">📅 {{ post.date_published|date:"d/m/Y" }}</span>
+            {% if post.author %}
+            <span class="border-l pl-4">✍️ Tác giả: <b class="text-[var(--primary-color)]">{{ post.author }}</b></span>
+            {% endif %}
+        </div>
+
+        {% if post.image %}
+        <div class="mb-10 overflow-hidden rounded-2xl">
+            <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-auto object-cover hover:scale-105 transition-transform duration-500">
+        </div>
+        {% endif %}
+
+        <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed post-content">
+            {{ post.content|safe }}
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-gray-100">
+            <div class="flex flex-wrap gap-4 justify-between items-center">
+                <a href="{% url 'blog' %}" class="text-[var(--primary-color)] font-medium hover:underline">← Quay lại danh sách bài viết</a>
+                <div class="flex gap-3">
+                    <a href="{% url 'contact' %}" class="btn-primary px-6 py-2 rounded-full text-sm">Tư vấn lớp học</a>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+<div id="footer-root"></div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/babel" src="{% static 'components/Header.js' %}"></script>
+    <script type="text/babel" src="{% static 'components/Footer.js' %}"></script>
+    <script type="text/babel" src="{% static 'js/post-app.js' %}"></script>
+{% endblock %}
