@@ -189,13 +189,19 @@ function Header({ user = null, onLogout = () => { }, onLogin = () => { } }) {
     const getLinkClass = (itemPath) => {
       const currentPath = window.location.pathname;
 
-      // Logic kiểm tra trang chủ cực kỳ chính xác
+      // 1. Kiểm tra trang chủ
       const isHome = (itemPath === '/' || itemPath === '/index.html/') &&
-        (currentPath === '/' || currentPath === '/index.html' || currentPath === '/index.html/');
+                    (currentPath === '/' || currentPath === '/index.html' || currentPath === '/index.html/');
 
-      // Kiểm tra các trang khác bằng cách xem path có tồn tại trong URL không
-      // Ví dụ: URL là /blog.html/ thì itemPath /blog.html/ sẽ khớp
-      const isActive = currentPath === itemPath || (itemPath !== '/' && currentPath.includes(itemPath));
+      // 2. Logic đặc biệt cho Blog: Sáng màu khi ở blog.html HOẶC post.html
+      let isActive = currentPath === itemPath || (itemPath !== '/' && currentPath.includes(itemPath));
+
+      if (itemPath.includes('blog.html')) {
+        // Nếu menu đang xét là 'Blog' và URL hiện tại chứa 'post.html', vẫn cho nó active
+        if (currentPath.includes('post.html')) {
+          isActive = true;
+        }
+      }
 
       if (isHome || isActive) {
         return "bg-[var(--primary-color)] text-white transition-all duration-300 font-medium px-4 py-2 rounded-lg shadow-md";
