@@ -1,22 +1,26 @@
-"""
-URL configuration for myproject project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
+from main import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # 🏠 Trang chủ
+    # Cho phép cả địa chỉ trống '' và 'index.html' đều trỏ về home_view
+    path('', views.home_view, name='home'),
+    # 🧘 Các trang chức năng (Thêm / ở cuối để khớp với cấu hình Django mặc định)
+    path('contact.html/', views.contact_view, name='contact'),
+    path('schedule.html/', views.schedule_view, name='schedule'),
+    path('blog.html/', views.blog_view, name='blog'),
+    path('class-detail.html/', views.class_detail_view, name='class_detail'),
+    path('register.html/', views.register_view, name='register'),
+    path('registration-info.html/', views.registration_info_view, name='registration_info'),
+    path('post.html/<slug:slug>/', views.post_view, name='post'),
 ]
+
+# ✅ Cấu hình file tĩnh và Media
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

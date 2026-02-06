@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}SoraYoga Hóc Môn: Hành Trình Cân Bằng Thân - Tâm - Trí{% endblock %}
+
+{% block extra_head %}
+    <script>
+        window.siteConfig = {
+            logoUrl: "{% static 'images/logo.png' %}",
+            homeUrl: "{% url 'home' %}"
+        };
+    </script>
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <style type="text/tailwindcss">
+    @layer theme {
+        :root {
+            --primary-color: #7C9885;
+            --secondary-color: #E8F3E8;
+            --accent-color: #A8C4B5;
+            --text-dark: #2C3E37;
+            --text-light: #5F6F65;
+            --bg-light: #F8FBF9;
+        }
+    }
+    @layer base {
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+    }
+    @layer components {
+            .btn-primary { @apply px-6 py-3 rounded-lg font-medium transition-all; background-color: #7C9885; color: white; }
+            .nav-link.active { color: #7C9885; border-bottom: 2px solid #7C9885; }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% endblock %}
+
+{% block scripts %}
+    <script type="text/babel" src="{% static 'components/Header.js' %}"></script>
+    <script type="text/babel" src="{% static 'components/Hero.js' %}"></script>
+    <script type="text/babel" src="{% static 'components/AboutContent.js' %}"></script>
+    <script type="text/babel" src="{% static 'components/Features.js' %}"></script>
+    <script type="text/babel" src="{% static 'components/Teachers.js' %}"></script>
+    <script type="text/babel" src="{% static 'components/Testimonials.js' %}"></script>
+    <script type="text/babel" src="{% static 'components/Newsletter.js' %}"></script>
+    <script type="text/babel" src="{% static 'components/Footer.js' %}"></script>
+    
+    <script type="text/babel" src="{% static 'js/app.js' %}"></script>
+{% endblock %}

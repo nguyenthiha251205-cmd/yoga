@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SoraYoga{% endblock %}</title>
+
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script>
+        // Cung cấp CSRF Token cho React
+        const CSRF_TOKEN = "{{ csrf_token }}";
+    </script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-gray-50">
+
+    <div id="root"></div>
+
+    {% block content %}{% endblock %}
+
+    {% block scripts %}
+    {% endblock %}
+
+    <script>
+        // Khởi tạo Lucide icons sau khi React render
+        setTimeout(() => {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }, 500);
+    </script>
+</body>
+</html>

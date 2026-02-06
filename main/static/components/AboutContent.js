@@ -1,0 +1,132 @@
+function AboutContent() {
+  try {
+    return (
+      <div className="pt-24" data-name="about-content" data-file="components/AboutContent.js">
+        <section className="py-20 bg-gradient-to-br from-[var(--bg-light)] to-[var(--secondary-color)]">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 text-[var(--text-dark)]">SoraYoga</h1>
+              <p className="text-xl text-[var(--text-light)] leading-relaxed">
+                SoraYoga được thành lập với sứ mệnh mang đến một không gian thư giãn, nơi mọi người có thể
+                kết nối với chính mình và khám phá sức mạnh nội tại thông qua thực hành Yoga.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
+              <div>
+                <h2 className="text-3xl font-bold mb-6 text-[var(--text-dark)]">Câu Chuyện Của Chúng Tôi</h2>
+                <p className="text-[var(--text-light)] mb-4 leading-relaxed">
+                  <a href="registration-info.html" className="font-semibold text-primary hover:underline">SoraYoga</a> bắt đầu từ năm 2018 với mong muốn chia sẻ những giá trị tốt đẹp của Yoga đến cộng đồng.
+                  Qua 7 năm phát triển, chúng tôi đã trở thành một trong những trung tâm Yoga uy tín nhất.
+                </p>
+                <p className="text-[var(--text-light)] mb-4 leading-relaxed">
+                  Chúng tôi không chỉ dạy Yoga, chúng tôi xây dựng một cộng đồng. Từ những lớp học đầu tiên trong một căn phòng nhỏ,
+                  SoraYoga đã phát triển nhờ vào sự tin yêu và cam kết của mỗi học viên. Mỗi giáo viên tại đây đều là một người bạn đồng hành,
+                  sẵn sàng lắng nghe và hỗ trợ bạn trên từng bước của hành trình khám phá bản thân.
+                </p>
+
+                {/* == PHẦN NỘI DUNG MỚI THÊM VÀO (ĐÃ SỬA LỖI) == */}
+                <p className="text-[var(--text-light)] mb-4 leading-relaxed">
+                  Người sáng lập của chúng tôi, cô Minh Anh, đã tìm thấy Yoga trong giai đoạn căng thẳng nhất của cuộc đời mình.
+                  Trải nghiệm sự chữa lành sâu sắc mà Yoga mang lại, cô đã quyết tâm rời bỏ công việc văn phòng để cống hiến
+                  cho việc lan tỏa bộ môn này. SoraYoga ra đời từ chính đam mê và khát khao tạo ra một "ngôi nhà thứ hai"
+                  cho những ai tìm kiếm sự bình yên.
+                </p>
+                <p className="text-[var(--text-light)] mb-4 leading-relaxed">
+                  Những ngày đầu đầy thử thách, nhưng chính sự gắn kết của các học viên đầu tiên đã tiếp thêm sức mạnh cho chúng tôi.
+                  Họ không chỉ đến tập, họ ở lại chia sẻ, cùng nhau tổ chức các buổi tập ngoài trời, các quỹ từ thiện.
+                  Cộng đồng SoraYoga lớn mạnh từ đó, trên nền tảng của sự chân thành và yêu thương.
+                </p>
+                {/* == KẾT THÚC PHẦN MỚI THÊM == */}
+
+                <p className="text-[var(--text-light)] leading-relaxed">
+                  Với hơn 200 học viên và đội ngũ 5 giáo viên có chứng chỉ quốc tế, chúng tôi tự hào mang đến
+                  trải nghiệm Yoga chất lượng cao cho mọi đối tượng.
+                </p>
+              </div>
+              <div>
+                <img src="https://images.unsplash.com/photo-1545389336-cf090694435e?w=800&q=80"
+                  alt="SoraYoga Studio" className="rounded-2xl shadow-xl" />
+              </div>
+            </div>
+
+            <div className="mb-20 text-center max-w-4xl mx-auto">
+              <h2 className="text-3xl font-bold mb-6 text-[var(--text-dark)]">Triết Lý Của Chúng Tôi</h2>
+              <p className="text-[var(--text-light)] mb-4 leading-relaxed">
+                SoraYoga tin rằng Yoga là dành cho tất cả mọi người, không phân biệt tuổi tác, giới tính hay trình độ thể chất.
+                Chúng tôi tập trung vào việc thực hành Yoga một cách an toàn, chánh niệm và bền vững. Triết lý của chúng tôi là "Kết nối" -
+                kết nối cơ thể với tâm trí, kết nối cá nhân với cộng đồng, và kết nối con người với thiên nhiên.
+              </p>
+              <p className="text-[var(--text-light)] leading-relaxed">
+                Chúng tôi khuyến khích một môi trường học tập không phán xét, nơi bạn có thể tự do khám phá giới hạn của bản thân,
+                học cách lắng nghe cơ thể và tìm thấy sự bình yên từ sâu bên trong. Đối với chúng tôi, thảm tập là một ốc đảo an toàn
+                để bạn nạp lại năng lượng và tìm lại chính mình.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
+              <div>
+                <img src="components/images/khonggiancuachungtoi.jpg"
+                  alt="Không gian SoraYoga" className="rounded-2xl shadow-xl" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold mb-6 text-[var(--text-dark)]">Không Gian Của Chúng Tôi</h2>
+                <p className="text-[var(--text-light)] mb-4 leading-relaxed">
+                  Chúng tôi hiểu rằng không gian có ảnh hưởng sâu sắc đến trải nghiệm tập luyện.
+                  Vì vậy, studio của SoraYoga được thiết kế với tông màu ấm áp, ánh sáng tự nhiên và
+                  vật liệu gần gũi với thiên nhiên.
+                </p>
+                <p className="text-[var(--text-light)] leading-relaxed">
+                  Mỗi phòng tập đều được trang bị hệ thống lọc không khí, dụng cụ tập luyện cao cấp và
+                  đầy đủ tiện nghi (phòng thay đồ, tủ khóa, thảm tập) để đảm bảo sự thoải mái
+                  và tiện lợi nhất cho học viên.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center p-6">
+                <div className="w-16 h-16 rounded-full bg-[var(--secondary-color)] flex items-center justify-center mx-auto mb-4">
+                  <div className="icon-target text-2xl text-[var(--primary-color)]"></div>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-[var(--text-dark)]">Sứ Mệnh</h3>
+                <p className="text-[var(--text-light)]">
+                  Đánh thức tiềm năng và chữa lành từ bên trong. Chúng tôi kiến tạo một ốc đảo bình yên
+                  để mọi người kết nối sâu sắc với cơ thể, tâm trí và tinh thần của chính mình.
+                </p>
+              </div>
+              <div className="text-center p-6">
+                <div className="w-16 h-16 rounded-full bg-[var(--secondary-color)] flex items-center justify-center mx-auto mb-4">
+                  <div className="icon-eye text-2xl text-[var(--primary-color)]"></div>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-[var(--text-dark)]">Tầm Nhìn</h3>
+                <p className="text-[var(--text-light)]">
+                  Trở thành biểu tượng của Yoga chánh niệm tại Việt Nam, lan tỏa một cộng đồng
+                  sống khỏe mạnh, tích cực và tìm thấy sự cân bằng đích thực trong cuộc sống hiện đại.
+                </p>
+              </div>
+              <div className="text-center p-6">
+                <div className="w-16 h-16 rounded-full bg-[var(--secondary-color)] flex items-center justify-center mx-auto mb-4">
+                  <div className="icon-heart text-2xl text-[var(--primary-color)]"></div>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-[var(--text-dark)]">Giá Trị</h3>
+                <p className="text-[var(--text-light)]">
+                  Tận tâm: Luôn đặt học viên làm trung tâm.
+                  Chánh niệm: Thực hành trong từng hơi thở.
+                  Cộng đồng: Xây dựng một ngôi nhà an toàn, không phán xét và đầy cảm hứng.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  } catch (error) {
+    console.error('AboutContent error:', error);
+    return null;
+  }
+}
