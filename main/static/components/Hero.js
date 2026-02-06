@@ -14,8 +14,8 @@ function Hero() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <a href="/schedule.html/" className="inline-block bg-[#e8f3ee] text-[var(--primary-color)] text-lg font-semibold px-6 py-3 rounded-full hover:bg-[var(--primary-color)] hover:text-white transition-all duration-300">
-  Xem Lịch Học
-</a>
+                  Xem Lịch Học
+                </a>
               </div>
 
               <div className="mt-12 flex items-center justify-center md:justify-start gap-8">
