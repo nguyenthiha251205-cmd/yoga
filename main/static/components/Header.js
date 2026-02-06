@@ -3,33 +3,33 @@
 // --- HÀNH ĐỘNG ĐĂNG NHẬP (Giữ nguyên) ---
 // Hàm này để giải mã token từ Google gửi về
 function parseJwt(token) {
-    var base64Url = token.split('.')[1];
-    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    return JSON.parse(jsonPayload);
+  var base64Url = token.split('.')[1];
+  var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+  return JSON.parse(jsonPayload);
 }
 
 // Hàm callback khi đăng nhập xong
 window.handleCredentialResponse = (response) => {
-    const responsePayload = parseJwt(response.credential);
-    
-    // Lưu thông tin vào localStorage để các trang khác (Lịch học, Blog) dùng chung
-    const user = {
-        name: responsePayload.name,
-        picture: responsePayload.picture,
-        email: responsePayload.email
-    };
-    
-    localStorage.setItem("user", JSON.stringify(user));
-    
-    // Đóng cửa sổ và load lại trang để Header cập nhật giao diện mới
-    window.location.reload();
+  const responsePayload = parseJwt(response.credential);
+
+  // Lưu thông tin vào localStorage để các trang khác (Lịch học, Blog) dùng chung
+  const user = {
+    name: responsePayload.name,
+    picture: responsePayload.picture,
+    email: responsePayload.email
+  };
+
+  localStorage.setItem("user", JSON.stringify(user));
+
+  // Đóng cửa sổ và load lại trang để Header cập nhật giao diện mới
+  window.location.reload();
 };
 function GoogleLoginButton({ onLogin }) {
   const buttonId = "googleSignInButton_" + Math.random().toString(36).substr(2, 9);
-  
+
   React.useEffect(() => {
     if (window.google?.accounts?.id) {
       window.google.accounts.id.initialize({
@@ -39,16 +39,17 @@ function GoogleLoginButton({ onLogin }) {
           onLogin({ name: data.name, email: data.email, picture: data.picture });
         },
         // ▼ THÊM DÒNG NÀY ĐỂ SỬA LỖI postMessage VÀ 400 ▼
-        use_fedcm_for_prompt: false 
+        ux_mode: "popup",
+        use_fedcm_for_prompt: false
       });
-      
+
       window.google.accounts.id.renderButton(
         document.getElementById(buttonId),
         { theme: "outline", size: "medium", text: "Đăng nhập với Google" }
       );
     }
   }, [onLogin]);
-  
+
   return <div id={buttonId} className="flex justify-center"></div>;
 }
 
@@ -189,8 +190,8 @@ function Header({ user = null, onLogout = () => { }, onLogin = () => { } }) {
       const currentPath = window.location.pathname;
 
       // Logic kiểm tra trang chủ cực kỳ chính xác
-      const isHome = (itemPath === '/' || itemPath === '/index.html/') && 
-                    (currentPath === '/' || currentPath === '/index.html' || currentPath === '/index.html/');
+      const isHome = (itemPath === '/' || itemPath === '/index.html/') &&
+        (currentPath === '/' || currentPath === '/index.html' || currentPath === '/index.html/');
 
       // Kiểm tra các trang khác bằng cách xem path có tồn tại trong URL không
       // Ví dụ: URL là /blog.html/ thì itemPath /blog.html/ sẽ khớp
@@ -199,7 +200,7 @@ function Header({ user = null, onLogout = () => { }, onLogin = () => { } }) {
       if (isHome || isActive) {
         return "bg-[var(--primary-color)] text-white transition-all duration-300 font-medium px-4 py-2 rounded-lg shadow-md";
       }
-      
+
       return "text-[var(--text-light)] hover:bg-gray-100 transition-all duration-300 font-medium px-4 py-2 rounded-lg";
     };
 
@@ -346,7 +347,7 @@ function Header({ user = null, onLogout = () => { }, onLogin = () => { } }) {
                       href={`/schedule.html${cls.slug ? '?class=' + cls.slug : ''}`}
                       className="block text-center text-sm bg-gray-100 text-[var(--text-light)] rounded-md py-2"
                       onClick={() => setIsMenuOpen(false)}
-                        >
+                    >
                       {cls.name}
                     </a>
                   ))}
