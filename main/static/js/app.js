@@ -64,9 +64,9 @@ function App() {
         <Hero />
         <section id="about"><AboutContent /></section>
         <Features />
-        <Teachers />
-        <Testimonials />
-        <Newsletter />
+        {/* <Teachers /> */}      {/* Ẩn tạm thời để không bị lỗi ReferenceError */}
+        {/* <Testimonials /> */}
+        {/* <Newsletter /> */}
         <Footer />
       </div>
     );
