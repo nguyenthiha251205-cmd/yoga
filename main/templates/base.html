@@ -3,42 +3,49 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SoraYoga{% endblock %}</title>
-
-    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
     <script>
-        // Cung cấp CSRF Token cho React
-        const CSRF_TOKEN = "{{ csrf_token }}";
+        window.siteConfig = {
+            logoUrl: "{% static 'images/logo.png' %}",
+            homeUrl: "{% url 'home' %}",
+            currentUser: "{{ request.user.username|default:'' }}",
+            isAuthenticated: {{ request.user.is_authenticated|yesno:"true,false" }},
+            // Thêm dấu |default:"[]" để tránh lỗi JS nếu không có dữ liệu
+            yogaClasses: [
+                { "name": "Tất Cả Lớp Học" }, // Mục mặc định
+                {% if global_classes %}
+                    {% for cls in global_classes %}
+                    , { "name": "{{ cls.name|escapejs }}" }
+                    {% endfor %}
+                {% endif %}
+            ]
+        };
+        const CSRF_TOKEN = "{{ csrf_token|escapejs }}";
     </script>
-
     {% block extra_head %}{% endblock %}
 </head>
-
-<body class="bg-gray-50">
-
-    <div id="root"></div>
-
-    {% block content %}{% endblock %}
-
-    {% block scripts %}
-    {% endblock %}
-
+<body class="bg-gray-50 flex flex-col min-h-screen">
+    <div id="header-root"></div>
+    <div class="flex-grow">
+        {% block content %}{% endblock %}
+    </div>
+    <div id="footer-root"></div>
+    {% block scripts %}{% endblock %}
     <script>
-        // Khởi tạo Lucide icons sau khi React render
+        // Khởi tạo icons sau khi React render
         setTimeout(() => {
-            if (window.lucide) {
-                window.lucide.createIcons();
-            }
-        }, 500);
+            if (window.lucide) { window.lucide.createIcons(); }
+        }, 1000);
     </script>
 </body>
 </html>

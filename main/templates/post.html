@@ -1,56 +1,20 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block title %}{{ post.title }} - SoraYoga{% endblock %}
-
 {% block extra_head %}
     <script>
         window.siteConfig = {
             logoUrl: "/static/images/logo.png", 
-            homeUrl: "/" 
+            homeUrl: "/" ,
+            currentUser: "{{ request.user.username|default:'' }}"
         };
     </script>
     <meta name="description" content="{{ post.title }}">
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
-
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-    <style type="text/tailwindcss">
-    @layer theme {
-        :root {
-            --primary-color: #7C9885;
-            --secondary-color: #E8F3E8;
-            --accent-color: #A8C4B5;
-            --text-dark: #2C3E37;
-            --text-light: #5F6F65;
-            --bg-light: #F8FBF9;
-        }
-    }
-    @layer base {
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            color: var(--text-dark);
-            line-height: 1.6;
-            background-color: var(--bg-light);
-        }
-    }
-    @layer components {
-        .btn-primary { 
-            @apply px-6 py-3 rounded-lg font-medium transition-all; 
-            background-color: #7C9885; 
-            color: white; 
-        }
-        /* Style cho nội dung bài viết từ CKEditor */
-        .post-content p { @apply mb-4; }
-        .post-content h2 { @apply text-2xl font-bold mt-8 mb-4 text-[var(--text-dark)]; }
-        .post-content ul { @apply list-disc ml-6 mb-4; }
-    }
-    </style>
 {% endblock %}
-
 {% block content %}
 <div id="header-root"></div>
-
 <div class="pt-24 min-h-screen">
     <div class="container mx-auto px-6 py-10">
         <article class="max-w-4xl mx-auto bg-white p-6 md:p-12 rounded-3xl shadow-sm border border-gray-100">
@@ -59,28 +23,23 @@
                 <a href="{% url 'blog' %}" class="hover:text-[var(--primary-color)]">Blog</a> / 
                 <span class="text-gray-600">Chi tiết bài viết</span>
             </nav>
-
             <h1 class="text-3xl md:text-5xl font-bold mb-6 text-[var(--text-dark)] leading-tight">
                 {{ post.title }}
             </h1>
-            
             <div class="flex items-center text-sm text-gray-500 mb-8 border-b border-gray-50 pb-6">
                 <span class="mr-4 flex items-center gap-1">📅 {{ post.date_published|date:"d/m/Y" }}</span>
                 {% if post.author %}
                 <span class="border-l pl-4 flex items-center gap-1">✍️ Tác giả: <b class="text-[var(--primary-color)]">{{ post.author }}</b></span>
                 {% endif %}
             </div>
-
             {% if post.image %}
             <div class="mb-10 overflow-hidden rounded-2xl shadow-lg">
                 <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-auto object-cover">
             </div>
             {% endif %}
-
             <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed post-content">
                 {{ post.content|safe }}
             </div>
-
             <div class="mt-12 pt-8 border-t border-gray-100">
                 <div class="flex flex-col md:flex-row gap-6 justify-between items-center">
                     <a href="{% url 'blog' %}" class="flex items-center text-[var(--primary-color)] font-medium hover:gap-2 transition-all">
@@ -96,13 +55,10 @@
         </article>
     </div>
 </div>
-
 <div id="footer-root"></div>
 {% endblock %}
-
 {% block scripts %}
     <script type="text/babel" src="{% static 'components/Header.js' %}"></script>
     <script type="text/babel" src="{% static 'components/Footer.js' %}"></script>
-    
     <script type="text/babel" src="{% static 'js/post-app.js' %}"></script>
 {% endblock %}

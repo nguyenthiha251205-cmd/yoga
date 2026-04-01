@@ -1,5 +1,4 @@
 // class-detail-app.js
-
 // --- ErrorBoundary (Giữ nguyên để bảo vệ app) ---
 class ErrorBoundary extends React.Component {
     constructor(props) { super(props); this.state = { hasError: false }; }
@@ -11,27 +10,21 @@ class ErrorBoundary extends React.Component {
         return this.props.children;
     }
 }
-
 // --- Component bao bọc Header để quản lý User ---
 function HeaderWrapper() {
     const [user, setUser] = React.useState(JSON.parse(localStorage.getItem("user")) || null);
-
     function handleLogin(userInfo) {
         setUser(userInfo);
         localStorage.setItem("user", JSON.stringify(userInfo));
     }
-
     function handleLogout() {
         setUser(null);
         localStorage.removeItem("user");
         window.location.reload();
     }
-
     return <Header user={user} onLogout={handleLogout} onLogin={handleLogin} />;
 }
-
 // --- TIẾN HÀNH RENDER VÀO CÁC VÙNG RIÊNG BIỆT ---
-
 // 1. Gắn Header vào vùng chọn #header-root
 const headerElem = document.getElementById('header-root');
 if (headerElem) {
@@ -42,7 +35,6 @@ if (headerElem) {
         </ErrorBoundary>
     );
 }
-
 // 2. Gắn Footer vào vùng chọn #footer-root
 const footerElem = document.getElementById('footer-root');
 if (footerElem) {
@@ -53,7 +45,6 @@ if (footerElem) {
         </ErrorBoundary>
     );
 }
-
 const detailElem = document.getElementById('class-detail-root');
 if (detailElem) {
     const detailRoot = ReactDOM.createRoot(detailElem);
@@ -63,5 +54,4 @@ if (detailElem) {
         </ErrorBoundary>
     );
 }
-
 // Lưu ý: ClassDetailContent không render ở đây nữa vì nội dung đã nằm trong HTML của Django

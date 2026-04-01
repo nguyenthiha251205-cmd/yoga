@@ -1,145 +1,120 @@
-// components/ScheduleContent.js (Phiên bản mới - Gộp các lớp trùng tên)
-
-// --- CHÚNG TA KHÔNG CẦN COMPONENT CON (ClassItem) NỮA ---
-// (Vì logic đã thay đổi, chúng ta sẽ render trực tiếp)
-
 function ScheduleContent() {
+  // Khởi tạo state cho bộ lọc chi nhánh
+  const [selectedBranch, setSelectedBranch] = React.useState("Tất cả chi nhánh");
   try {
-    // Đọc dữ liệu lịch học (phải được tải trong schedule.html)
     const fullSchedule = window.scheduleData || {};
-    // Đọc dữ liệu thông tin lớp (phải được tải trong schedule.html)
     const allClassInfo = window.classData || [];
-
-    // Hàm helper để tìm slug (giữ nguyên)
+    const availableBranches = window.branchData || [];
     const findClassSlug = (className) => {
       const classInfo = allClassInfo.find(c => c.name === className);
       return classInfo ? classInfo.slug : className.toLowerCase().replace(/ /g, '-');
     };
-
-    // --- Logic lọc (Giữ nguyên) ---
-    let scheduleToShow = fullSchedule;
-    let pageTitle = "Lịch Học Hàng Tuần";
-    let pageSubtitle = "Xem lịch học cho tất cả các lớp của chúng tôi";
-
-    // 1. Đọc "class" từ URL
     const params = new URLSearchParams(window.location.search);
-    const classSlug = params.get('class');
-
-    if (classSlug) {
-      // 2. Tìm tên lớp học từ slug
-      const selectedClass = allClassInfo.find(c => c.slug === classSlug);
-
-      if (selectedClass) {
-        // 3. Cập nhật tiêu đề trang
-        pageTitle = `Lịch Học: ${selectedClass.name}`;
-        pageSubtitle = `Tất cả các lớp ${selectedClass.name} trong tuần.`;
-
-        // 4. Lọc dữ liệu lịch học
-        const filteredSchedule = {};
-        for (const day in fullSchedule) {
-          const classesForDay = fullSchedule[day].filter(c => c.class === selectedClass.name);
-          if (classesForDay.length > 0) {
-            filteredSchedule[day] = classesForDay;
-          }
+    const classNameParam = params.get('class_name'); 
+    // LOGIC LỌC KÉP: Theo Tên lớp (URL) và Chi nhánh (State)
+    let scheduleToShow = {};
+    Object.keys(fullSchedule).forEach(day => {
+        const filtered = fullSchedule[day].filter(c => {
+            const matchClass = (!classNameParam || classNameParam === "Tất Cả Lớp Học" || c.class === classNameParam);
+            const matchBranch = (selectedBranch === "Tất cả chi nhánh" || c.branch === selectedBranch);
+            return matchClass && matchBranch;
+        });
+        if (filtered.length > 0) {
+            scheduleToShow[day] = filtered;
         }
-        scheduleToShow = filteredSchedule;
-      }
-    }
-    // --- Kết thúc Logic lọc ---
-
-    // Lấy danh sách các ngày để hiển thị
+    });
+    let pageTitle = classNameParam && classNameParam !== "Tất Cả Lớp Học" ? `Lịch Học: ${classNameParam}` : "Lịch Học Hệ Thống SoraYoga";
+    let pageSubtitle = selectedBranch === "Tất cả chi nhánh" ? "Xem lịch học chi tiết tại các chi nhánh của chúng tôi" : `Đang xem lịch học tại: ${selectedBranch}`;
     const daysToShow = Object.keys(scheduleToShow);
-
     return (
-      <div className="pt-24 min-h-screen bg-[var(--bg-light)]" data-name="schedule-content" data-file="components/ScheduleContent.js">
+      <div className="pt-24 min-h-screen bg-[var(--bg-light)]">
         <div className="container mx-auto px-4 py-12">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-4 text-[var(--text-dark)]">{pageTitle}</h1>
-            <p className="text-lg text-[var(--text-light)]">{pageSubtitle}</p>
+            <p className="text-lg text-[var(--text-light)] mb-8">{pageSubtitle}</p>
+            {/* UI BỘ LỌC CHI NHÁNH */}
+            <div className="flex justify-center items-center gap-3">
+              <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Lọc theo cơ sở:</span>
+              <select 
+                className="bg-white border-2 border-[var(--primary-color)] text-[var(--text-dark)] font-semibold py-2 px-4 rounded-full outline-none cursor-pointer hover:bg-[var(--secondary-color)] transition-colors"
+                value={selectedBranch}
+                onChange={(e) => setSelectedBranch(e.target.value)}
+              >
+                <option value="Tất cả chi nhánh">--- Tất cả chi nhánh ---</option>
+                {availableBranches.map((branch, i) => (
+                    <option key={i} value={branch}>{branch}</option>
+                ))}
+              </select>
+            </div>
           </div>
-
           {daysToShow.length > 0 ? (
             <div className="flex flex-wrap justify-center gap-6">
               {daysToShow.map((day) => {
                 const classes = scheduleToShow[day];
-
-                {/* ▼▼▼ LOGIC GỘP LỚP MỚI ▼▼▼ */ }
-                {/*                  * Dùng reduce để biến mảng [lớp1, lớp2] thành 1 đối tượng { 'Hatha Yoga': [...] }
-                */}
                 const groupedClasses = classes.reduce((acc, currentClass) => {
-                  // Tên lớp (ví dụ: "Hatha Yoga")
-                  const className = currentClass.class;
-
-                  // Nếu chưa có nhóm cho "Hatha Yoga", tạo một nhóm
-                  if (!acc[className]) {
-                    acc[className] = {
-                      name: currentClass.class,
-                      teacher: currentClass.teacher,
-                      level: currentClass.level,
-                      slug: findClassSlug(currentClass.class),
-                      times: [] // Mảng để chứa các giờ học
-                    };
+                  // Chúng ta nhóm theo tên lớp và chi nhánh
+                  const groupKey = `${currentClass.class}-${currentClass.branch}`;
+                  if (!acc[groupKey]) {
+                      acc[groupKey] = {
+                          id: currentClass.id, // QUAN TRỌNG: Lưu lại ID từ Admin để dùng cho nút Chi tiết
+                          name: currentClass.class,
+                          branch: currentClass.branch,
+                          teacher: currentClass.teacher,
+                          level: currentClass.level,
+                          times: []
+                      };
                   }
-
-                  // Thêm giờ học này vào mảng times
                   const startHour = parseInt(currentClass.time.split(':')[0]);
-                  const timeLabel = startHour < 12 ? 'Sáng' : 'Tối';
-                  acc[className].times.push({ time: currentClass.time, label: timeLabel });
-
+                  acc[groupKey].times.push({ 
+                      time: currentClass.time, 
+                      label: startHour < 12 ? 'Sáng' : 'Tối' 
+                  });
                   return acc;
-                }, {});
-                {/* ▲▲▲ KẾT THÚC LOGIC GỘP ▲▲▲ */ }
-
+              }, {});
                 return (
                   <div key={day} className="w-full md:max-w-xl bg-white rounded-xl shadow-lg p-6">
-                    <h3 className="text-2xl font-bold mb-4 text-[var(--primary-color)]">{day}</h3>
-
-                    {/* ▼▼▼ GIAO DIỆN GỘP MỚI ▼▼▼ */}
-                    {/* Biến đối tượng (object) groupedClasses thành một mảng (array) để lặp */}
+                    <h3 className="text-2xl font-bold mb-4 text-[var(--primary-color)] border-b pb-2">{day}</h3>
                     <div className="space-y-3">
                       {Object.values(groupedClasses).map((item, index) => (
-                        <div key={index} className="flex flex-col md:flex-row md:items-center p-4 bg-[var(--bg-light)] rounded-lg gap-4">
-
-                          {/* Phần 1: Thông tin (Tên, Giáo viên, Giờ) */}
-                          <div className="flex-none md:w-auto">
+                        <div key={index} className="flex flex-col md:flex-row md:items-center p-4 bg-gray-50 rounded-lg gap-4 hover:bg-white hover:shadow-md transition-all border-l-4 border-[var(--primary-color)]">
+                          <div className="flex-1">
                             <h4 className="text-lg font-bold text-[var(--text-dark)]">{item.name}</h4>
-                            <p className="text-sm text-[var(--text-light)] mb-2">Giáo viên: {item.teacher}</p>
-
-                            {/* Render danh sách thời gian (Sáng/Tối) */}
-                            <div className="flex flex-col gap-1">
-                              {item.times.map((timeInfo, tIndex) => (
-                                <div key={tIndex} className="flex items-center gap-2">
-                                  {/* Thêm icon mặt trời/mặt trăng cho đẹp */}
-                                  <div className={`icon-${timeInfo.label === 'Sáng' ? 'sun' : 'moon'} text-base ${timeInfo.label === 'Sáng' ? 'text-yellow-500' : 'text-indigo-500'}`}></div>
-                                  <span className="font-semibold text-[var(--text-dark)] text-base">
-                                    {timeInfo.label}: {timeInfo.time}
-                                  </span>
-                                </div>
+                            <p className="text-sm font-medium text-emerald-700 flex items-center mb-1">
+                              <span className="mr-1">📍</span> {item.branch}
+                            </p>
+                            <p className="text-xs text-[var(--text-light)] mb-2 italic">GV: {item.teacher}</p>
+                            <div className="flex flex-wrap gap-2">
+                              {item.times.map((t, idx) => (
+                                <span key={idx} className="bg-white border border-gray-100 px-2 py-1 rounded text-xs font-bold shadow-sm">
+                                  {t.label}: {t.time}
+                                </span>
                               ))}
                             </div>
                           </div>
-
-                          {/* Phần 2: Nút (Giữ nguyên) */}
-                          <div className="ml-auto flex flex-row items-center gap-4 mt-3 md:mt-0">
-                            <span className="inline-block px-4 py-2 bg-[var(--secondary-color)] text-[var(--primary-color)] rounded-full text-sm font-medium">
+                          <div className="flex flex-col gap-2 min-w-[100px]">
+                            <span className="text-center px-2 py-1 bg-emerald-50 text-emerald-600 rounded text-[10px] font-black uppercase border border-emerald-100">
                               {item.level}
                             </span>
-                            <a href={`/class-detail.html/?slug=${item.slug}`} className="btn-primary w-full md:w-auto">
-                              Xem chi tiết
+                            <a 
+                                href={`/class-detail.html/?id=${item.id}`} 
+                                className="text-center py-2 bg-[var(--primary-color)] text-white rounded-lg text-xs font-bold hover:opacity-90"
+                            >
+                                Chi tiết
                             </a>
                           </div>
                         </div>
                       ))}
                     </div>
-                    {/* ▲▲▲ KẾT THÚC GIAO DIỆN GỘP ▲▲▲ */}
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="text-center">
-              <p className="text-lg text-[var(--text-light)]">Không tìm thấy lịch học cho lớp này.</p>
-              <a href="/schedule.html" className="btn-primary mt-6">Xem Toàn Bộ Lịch Học</a>
+            <div className="text-center py-20 bg-white rounded-3xl shadow-inner border-2 border-dashed border-gray-100">
+              <p className="text-xl text-gray-400 italic">Hiện không có lịch dạy phù hợp với yêu cầu lọc của bạn.</p>
+              <button onClick={() => {setSelectedBranch("Tất cả chi nhánh"); window.history.replaceState({}, '', window.location.pathname);}} className="mt-4 text-[var(--primary-color)] font-bold hover:underline">
+                Xem lại tất cả lịch học
+              </button>
             </div>
           )}
         </div>
@@ -147,6 +122,6 @@ function ScheduleContent() {
     );
   } catch (error) {
     console.error('ScheduleContent error:', error);
-    return null;
+    return <div className="pt-32 text-center text-red-500 font-bold">Lỗi hệ thống khi tải lịch học.</div>;
   }
 }

@@ -1,0 +1,161 @@
+{% extends "admin_custom/base_admin.html" %}
+{% load static %}
+{% block admin_content %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Quản lý Bài viết</h1>
+        <p class="text-sm text-gray-500">Chia sẻ kiến thức Yoga và tin tức hệ thống</p>
+    </div>
+    <button onclick="toggleModal('addPostModal')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center shadow-sm">
+        <i data-lucide="pen-tool" class="w-4 h-4 mr-2"></i> Viết bài mới
+    </button>
+</div>
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="w-full text-left border-collapse">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Ảnh & Tiêu đề</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Chuyên mục</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Ngày đăng</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase text-right">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for p in posts %}
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="p-4 flex items-center space-x-4">
+                    <div class="w-16 h-10 rounded bg-gray-200 overflow-hidden flex-shrink-0">
+                        {% if p.image %}
+                            <img src="{{ p.image.url }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-gray-400"><i data-lucide="image" class="w-4 h-4"></i></div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="font-bold text-gray-800">{{ p.title }}</p>
+                        <p class="text-xs text-gray-400">Tác giả: {{ p.author.username }}</p>
+                    </div>
+                </td>
+                <td class="p-4">
+                    <span class="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-medium">{{ p.category }}</span>
+                </td>
+                <td class="p-4 text-sm text-gray-500">{{ p.date_published|date:"d/m/Y H:i" }}</td>
+                <td class="p-4 text-right">
+                    <div class="flex justify-end space-x-2">
+                        <button onclick="openEditPostModal('{{ p.id }}', '{{ p.title }}', '{{ p.category }}', '{{ p.summary|escapejs }}', '{{ p.content|escapejs }}')" 
+                                class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        </button>
+                        <a href="{% url 'delete_post' p.id %}" onclick="return confirm('Xóa bài viết này?')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="p-8 text-center text-gray-400">Chưa có bài viết nào.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div id="addPostModal" class="fixed inset-0 bg-slate-900/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col">
+        <div class="p-6 border-b bg-gray-50"><h2 class="text-xl font-bold text-gray-800">Soạn thảo bài viết mới</h2></div>
+        <form method="POST" action="{% url 'admin_blog_list' %}" enctype="multipart/form-data" class="p-6 space-y-4 overflow-y-auto" onsubmit="syncQuill('add')">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tiêu đề</label>
+                    <input type="text" name="title" required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Chuyên mục</label>
+                    <input type="text" name="category" placeholder="Yoga, Sức khỏe..." class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Ảnh đại diện</label>
+                <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tóm tắt ngắn</label>
+                <textarea name="summary" class="w-full p-2.5 border rounded-lg h-20 outline-none"></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Nội dung chi tiết</label>
+                <div id="editor-add" class="h-64 bg-white"></div>
+                <input type="hidden" name="content" id="content-add">
+            </div>
+            <div class="flex space-x-3 pt-4">
+                <button type="button" onclick="toggleModal('addPostModal')" class="flex-1 py-2.5 border rounded-xl hover:bg-gray-50">Hủy</button>
+                <button type="submit" class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold">Đăng bài</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="editPostModal" class="fixed inset-0 bg-slate-900/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col">
+        <div class="p-6 border-b bg-gray-50"><h2 class="text-xl font-bold text-gray-800">Cập nhật bài viết</h2></div>
+        <form id="editPostForm" method="POST" enctype="multipart/form-data" class="p-6 space-y-4 overflow-y-auto" onsubmit="syncQuill('edit')">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tiêu đề</label>
+                    <input type="text" id="edit-title" name="title" required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Chuyên mục</label>
+                    <input type="text" id="edit-category" name="category" class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Ảnh đại diện (Bỏ trống nếu giữ nguyên)</label>
+                <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tóm tắt ngắn</label>
+                <textarea id="edit-summary" name="summary" class="w-full p-2.5 border rounded-lg h-20 outline-none"></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Nội dung chi tiết</label>
+                <div id="editor-edit" class="h-64 bg-white"></div>
+                <input type="hidden" name="content" id="content-edit">
+            </div>
+            <div class="flex space-x-3 pt-4">
+                <button type="button" onclick="toggleModal('editPostModal')" class="flex-1 py-2.5 border rounded-xl hover:bg-gray-50">Hủy</button>
+                <button type="submit" class="flex-1 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    function toggleModal(id) {
+        document.getElementById(id).classList.toggle('hidden');
+    }
+    // Khởi tạo 2 Editor riêng biệt
+    var quillAdd = new Quill('#editor-add', { theme: 'snow', placeholder: 'Viết nội dung tại đây...' });
+    var quillEdit = new Quill('#editor-edit', { theme: 'snow', placeholder: 'Chỉnh sửa nội dung...' });
+    function syncQuill(type) {
+        if (type === 'add') {
+            document.getElementById('content-add').value = quillAdd.root.innerHTML;
+        } else {
+            document.getElementById('content-edit').value = quillEdit.root.innerHTML;
+        }
+    }
+    function openEditPostModal(id, title, category, summary, content) {
+        const form = document.getElementById('editPostForm');
+        // Cập nhật Action URL theo ID bài viết
+        form.action = `/admin-custom/blog/edit/${id}/`;
+        // Đổ dữ liệu thô vào các input
+        document.getElementById('edit-title').value = title;
+        document.getElementById('edit-category').value = category;
+        document.getElementById('edit-summary').value = summary;
+        // Đổ dữ liệu HTML vào Quill Editor
+        quillEdit.root.innerHTML = content;
+        toggleModal('editPostModal');
+    }
+    lucide.createIcons();
+</script>
+{% endblock %}

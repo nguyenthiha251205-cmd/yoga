@@ -1,0 +1,210 @@
+{% extends "admin_custom/base_admin.html" %}
+{% load humanize %}
+{% block admin_content %}
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Quản lý Lớp học & Dịch vụ</h1>
+        <p class="text-sm text-gray-500">Thiết lập các gói tập và lớp học cho hệ thống SoraYoga</p>
+    </div>
+    <div class="flex items-center gap-3">
+        <div class="relative">
+            <select id="sortAdminClasses" onchange="sortClasses()" class="appearance-none bg-white border border-gray-200 text-gray-700 py-2 px-4 pr-10 rounded-lg text-sm focus:outline-none focus:border-emerald-500 cursor-pointer shadow-sm">
+                <option value="">-- Sắp xếp --</option>
+                <option value="az">Tên lớp: A đến Z</option>
+                <option value="za">Tên lớp: Z đến A</option>
+                <option value="branch">Theo chi nhánh</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+        </div>
+        <button onclick="toggleModal('addClassModal')" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition flex items-center shadow-sm font-bold">
+            <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Thêm lớp mới
+        </button>
+    </div>
+</div>
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="w-full text-left border-collapse">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Tên Lớp & Mô tả</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Chi nhánh</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Thời lượng</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Học phí</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase text-right">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for c in classes %}
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="p-4">
+                    <p class="font-bold text-gray-800">{{ c.name }}</p>
+                    <p class="text-xs text-gray-500 truncate w-64">{{ c.description }}</p>
+                </td>
+                <td class="p-4">
+                    <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium">
+                        {{ c.branch.name }}
+                    </span>
+                </td>
+                <td class="p-4 text-sm text-gray-600">{{ c.duration_minutes }} phút</td>
+                <td class="p-4 font-semibold text-emerald-600">
+                    <span class="price-format" data-price="{{ c.price }}">{{ c.price|intcomma }} VNĐ</span>
+                </td>
+                <td class="p-4 text-right">
+                    <div class="flex justify-end space-x-2">
+                        <a href="{% url 'manage_schedule' c.id %}" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg" title="Quản lý lịch tập">
+                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                        </a>
+                        <button type="button" 
+                                onclick="openEditClassModal('{{ c.id }}', '{{ c.name|escapejs }}', '{{ c.branch.id }}', '{{ c.price }}', '{{ c.duration_minutes }}', '{{ c.description|escapejs }}')" 
+                                class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        </button>
+                        <a href="{% url 'delete_class' c.id %}" onclick="return confirm('Xóa lớp này?')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row"><td colspan="5" class="p-8 text-center text-gray-400">Chưa có lớp học nào.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div id="addClassModal" class="fixed inset-0 bg-slate-900/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+        <div class="p-6 border-b bg-gray-50"><h2 class="text-xl font-bold text-gray-800">Tạo lớp học mới</h2></div>
+        <form method="POST" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tên lớp</label>
+                <input type="text" name="name" required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Chi nhánh</label>
+                <select name="branch" class="w-full p-2.5 border rounded-lg outline-none">
+                    {% for b in branches %}
+                    <option value="{{ b.id }}">{{ b.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Giá (VNĐ)</label>
+                    <input type="number" name="price" required class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Phút</label>
+                    <input type="number" name="duration" value="60" class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Mô tả</label>
+                <textarea name="description" class="w-full p-2.5 border rounded-lg h-24 outline-none"></textarea>
+            </div>
+            <div class="flex space-x-3 mt-6">
+                <button type="button" onclick="toggleModal('addClassModal')" class="flex-1 py-2.5 border rounded-xl hover:bg-gray-50">Hủy</button>
+                <button type="submit" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold">Lưu lớp học</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="editClassModal" class="fixed inset-0 bg-slate-900/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+        <div class="p-6 border-b bg-gray-50"><h2 class="text-xl font-bold text-gray-800">Cập nhật lớp học</h2></div>
+        <form id="editClassForm" method="POST" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tên lớp</label>
+                <input type="text" id="edit-name" name="name" required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Chi nhánh</label>
+                <select id="edit-branch" name="branch" class="w-full p-2.5 border rounded-lg outline-none">
+                    {% for b in branches %}
+                    <option value="{{ b.id }}">{{ b.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Giá (VNĐ)</label>
+                    <input type="number" id="edit-price" name="price" required class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Phút</label>
+                    <input type="number" id="edit-duration" name="duration" class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Mô tả</label>
+                <textarea id="edit-description" name="description" class="w-full p-2.5 border rounded-lg h-24 outline-none"></textarea>
+            </div>
+            <div class="flex space-x-3 mt-6">
+                <button type="button" onclick="toggleModal('editClassModal')" class="flex-1 py-2.5 border rounded-xl hover:bg-gray-50">Hủy</button>
+                <button type="submit" class="flex-1 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold">Cập nhật</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    function toggleModal(id) {
+        const modal = document.getElementById(id);
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        } else {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    }
+    function openEditClassModal(id, name, branchId, price, duration, description) {
+        const form = document.getElementById('editClassForm');
+        form.action = `/admin-custom/classes/edit/${id}/`;
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-branch').value = branchId;
+        // Đảm bảo truyền số thuần túy vào input number
+        const cleanPrice = price.toString().replace(/[^0-9]/g, '');
+        document.getElementById('edit-price').value = cleanPrice;
+        document.getElementById('edit-duration').value = duration;
+        document.getElementById('edit-description').value = description;
+        toggleModal('editClassModal');
+    }
+    // HÀM QUAN TRỌNG: Định dạng hiển thị 500,000
+    function formatPrices() {
+        const priceElements = document.querySelectorAll('.price-format');
+        priceElements.forEach(el => {
+            const rawValue = el.getAttribute('data-price');
+            if (rawValue && !isNaN(rawValue)) {
+                // Format kiểu VN: 500.000 hoặc US: 500,000 (tùy bạn chọn)
+                const formatted = new Intl.NumberFormat('en-US').format(rawValue);
+                el.innerText = formatted + ' VNĐ';
+            }
+        });
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        formatPrices();
+        lucide.createIcons();
+    });
+    function sortClasses() {
+        const sortValue = document.getElementById('sortAdminClasses').value;
+        if (!sortValue) return;
+        const tbody = document.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)'));
+        rows.sort((a, b) => {
+            let valA, valB;
+            if (sortValue === 'az' || sortValue === 'za') {
+                valA = a.cells[0].querySelector('p').innerText.trim().toLowerCase();
+                valB = b.cells[0].querySelector('p').innerText.trim().toLowerCase();
+                return sortValue === 'az' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            } else if (sortValue === 'branch') {
+                valA = a.cells[1].querySelector('span').innerText.trim().toLowerCase();
+                valB = b.cells[1].querySelector('span').innerText.trim().toLowerCase();
+                return valA.localeCompare(valB);
+            }
+        });
+        rows.forEach(row => tbody.appendChild(row));
+    }
+</script>
+{% endblock %}

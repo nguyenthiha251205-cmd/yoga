@@ -1,65 +1,58 @@
 {% extends "base.html" %}
 {% load static %}
-
+{% load humanize %}
 {% block title %}Lịch Học Yoga Hàng Tuần - SoraYoga Hóc Môn{% endblock %}
-
 {% block extra_head %}
     <meta name="description" content="Xem lịch tập Yoga chi tiết tại SoraYoga Hóc Môn. Đầy đủ các lớp Hatha, Vinyasa, Yin Yoga buổi sáng và buổi tối cho mọi cấp độ.">
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
-    
-    <script>
-        window.siteConfig = {
-            logoUrl: "{% static 'images/logo.png' %}",
-            homeUrl: "{% url 'home' %}"
-        };
-    </script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-    <style type="text/tailwindcss">
-    @layer theme {
-        :root {
-            --primary-color: #7C9885;
-            --secondary-color: #E8F3E8;
-            --accent-color: #A8C4B5;
-            --text-dark: #2C3E37;
-            --text-light: #5F6F65;
-            --bg-light: #F8FBF9;
-        }
-    }
-    @layer base {
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            color: var(--text-dark);
-            background-color: var(--bg-light);
-        }
-    }
-    @layer components {
-        .schedule-card {
-            @apply bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
-        }
-        .time-badge {
-            @apply inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4;
-        }
-    }
-    </style>
 {% endblock %}
-
 {% block content %}
-<div id="header-root"></div>
-
-<div id="schedule-root"></div>
-
-<div id="footer-root"></div>
+    <div id="schedule-root" class="mt-24"></div> 
 {% endblock %}
-
 {% block scripts %}
-    <script type="text/babel" src="{% static 'components/classData.js' %}"></script>
-    <script type="text/babel" src="{% static 'components/scheduleData.js' %}"></script>
-    
-    <script type="text/babel" src="{% static 'components/Header.js' %}"></script>
-    <script type="text/babel" src="{% static 'components/Footer.js' %}"></script>
-    
-    <script type="text/babel" src="{% static 'components/ScheduleContent.js' %}"></script>
-    
-    <script type="text/babel" src="{% static 'js/schedule-app.js' %}"></script>
+<script>
+   // 1. Lấy lịch học từ Database
+    window.scheduleData = {
+        {% regroup schedules by get_day_of_week_display as day_list %}
+        {% for day in day_list %}
+            "{{ day.grouper|escapejs }}": [
+                {% for s in day.list %}
+                {
+                    // SỬA TẠI ĐÂY: Phải lấy đúng ID của lớp học từ Database
+                    "id": "{{ s.yoga_class.id }}", 
+                    "class": "{{ s.yoga_class.name|escapejs }}",
+                    "teacher": "Giáo viên Sora", 
+                    "time": "{{ s.start_time|time:'H:i' }}",
+                    "level": "Cơ bản",
+                    "branch": "{{ s.yoga_class.branch.name|escapejs }}"
+                }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ]{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+    // 2. Tương tự cho classData
+    window.classData = [
+        {% for class in yoga_classes %}
+        { 
+            "id": "{{ class.id }}", // THÊM DÒNG NÀY
+            "name": "{{ class.name|escapejs }}", 
+            "branch": "{{ class.branch.name|escapejs }}",
+            "price": "{{ class.price|intcomma }}",
+            "description": "{{ class.description|escapejs }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    const allBranches = [];
+    Object.values(window.scheduleData).forEach(dayClasses => {
+        dayClasses.forEach(c => {
+            if (!allBranches.includes(c.branch)) allBranches.push(c.branch);
+        });
+    });
+    window.branchData = allBranches;
+</script>
+<script type="text/babel" src="{% static 'components/Header.js' %}"></script>
+<script type="text/babel" src="{% static 'components/Footer.js' %}"></script>
+<script type="text/babel" src="{% static 'components/ScheduleContent.js' %}"></script>
+<script type="text/babel" src="{% static 'js/schedule-app.js' %}"></script>
 {% endblock %}

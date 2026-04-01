@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Tham gia SoraYoga | Hành trình Thân - Tâm - Trí{% endblock %}
+{% block extra_head %}
+    <script>
+        window.siteConfig = {
+            logoUrl: "{% static 'images/logo.png' %}",
+            homeUrl: "{% url 'home' %}",
+            currentUser: "{{ request.user.username|default:'' }}"
+        };
+    </script>
+{% endblock %}
+{% block content %}
+<div id="header-root"></div>
+<main class="pt-40 pb-20 bg-[var(--bg-light)] min-h-screen flex items-center">
+    <div class="max-w-md mx-auto px-4 w-full">
+        <div id="register-account-root" class="bg-white p-8 rounded-3xl shadow-xl border border-[#E8F3E8]">
+            <div class="flex justify-center py-10">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#7C9885]"></div>
+            </div>
+        </div>
+    </div>
+</main>
+<div id="footer-root"></div>
+{% endblock %}
+{% block scripts %}
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+<script type="text/babel" src="{% static 'components/Header.js' %}"></script>
+<script type="text/babel" src="{% static 'components/Footer.js' %}"></script>
+<script type="text/babel" src="{% static 'js/register-account-app.js' %}"></script>
+<script type="text/babel">
+    const root = ReactDOM.createRoot(document.getElementById('register-account-root'));
+    root.render(<RegisterAccount />);
+</script>
+{% endblock %}

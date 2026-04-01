@@ -1,5 +1,4 @@
 // register-app.js (Phiên bản đã thêm chức năng CHỐNG TRÙNG LẶP)
-
 // --- ErrorBoundary (Giữ nguyên) ---
 class ErrorBoundary extends React.Component {
     constructor(props) { super(props); this.state = { hasError: false }; }
@@ -11,137 +10,148 @@ class ErrorBoundary extends React.Component {
         return this.props.children;
     }
 }
-
-
-// --- COMPONENT FORM ĐĂNG KÝ (ĐÃ SỬA) ---
+// --- COMPONENT FORM ĐĂNG KÝ (BẢN CHUẨN) ---
 function NewRegistrationContent({ user, defaultSlug }) {
-
-    const allClassData = window.classData || [];
-    const availableClasses = allClassData.filter(c => c.price !== null && c.slug !== 'workshop');
-
+    const rawData = window.dbClasses && window.dbClasses.length > 0 
+                    ? window.dbClasses 
+                    : (window.classData || []);
+    const availableClasses = rawData.filter(c => c.slug !== 'workshop');
     const [formData, setFormData] = React.useState({
         fullName: user?.name || "",
         email: user?.email || "",
         phone: "",
-        classSlug: defaultSlug || "",
+        selectedClassName: "", 
+        classId: "",           
+        session: "", // Thêm trường buổi tập: Sáng hoặc Tối
     });
-
-    // --- ▼▼▼ THÊM MỚI 1: State để lưu thông báo lỗi ▼▼▼ ---
     const [errorMessage, setErrorMessage] = React.useState(null);
-    // --- ▲▲▲ KẾT THÚC THÊM MỚI 1 ▲▲▲ ---
-
-    // Tự động điền thông tin user
+    const uniqueClassNames = [...new Set(availableClasses.map(c => c.name))];
+    const [filteredBranches, setFilteredBranches] = React.useState([]);
+    const handleClassChange = (e) => {
+        const className = e.target.value;
+        const branches = availableClasses.filter(c => c.name === className);
+        setFormData(prev => ({ 
+            ...prev, 
+            selectedClassName: className, 
+            classId: "",
+            session: "" // Reset buổi tập khi đổi lớp
+        }));
+        setFilteredBranches(branches);
+        if (errorMessage) setErrorMessage(null);
+    };
     React.useEffect(() => {
-        if (user) {
-            setFormData(prev => ({ ...prev, fullName: user.name, email: user.email }));
+        if (defaultSlug && availableClasses.length > 0) {
+            const found = availableClasses.find(c => c.slug === defaultSlug);
+            if (found) {
+                const branches = availableClasses.filter(c => c.name === found.name);
+                setFormData(prev => ({ 
+                    ...prev, 
+                    selectedClassName: found.name, 
+                    classId: found.id 
+                }));
+                setFilteredBranches(branches);
+            }
         }
-    }, [user]);
-
-    // Tự động chọn lớp từ link (sửa lỗi từ lần trước)
-    React.useEffect(() => {
-        if (defaultSlug && defaultSlug !== formData.classSlug) {
-            setFormData(prev => ({ ...prev, classSlug: defaultSlug }));
-        }
-    }, [defaultSlug]);
-
-    // Hàm xử lý thay đổi form
+    }, [defaultSlug, availableClasses.length]);
     function handleChange(e) {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-
-        // --- THÊM MỚI: Xóa lỗi khi người dùng bắt đầu sửa lại ---
-        if (errorMessage) {
-            setErrorMessage(null);
-        }
+        if (errorMessage) setErrorMessage(null);
     }
-
-    // Hàm xử lý submit
     function handleSubmit(e) {
         e.preventDefault();
-        setErrorMessage(null); // Xóa lỗi cũ (nếu có)
-
-        // --- ▼▼▼ THÊM MỚI 2: Logic kiểm tra trùng lặp ▼▼▼ ---
-
-        // 1. Lấy danh sách đã đăng ký
-        const oldList = JSON.parse(localStorage.getItem("registrationList")) || [];
-
-        // 2. Kiểm tra xem có mục nào TRÙNG EMAIL VÀ TRÙNG LỚP HỌC không
-        const isDuplicate = oldList.some(item =>
-            item.email === formData.email &&
-            item.classSlug === formData.classSlug
-        );
-
-        // 3. Nếu trùng, hiển thị lỗi và dừng hàm
-        if (isDuplicate) {
-            setErrorMessage("Bạn đã đăng ký lớp này rồi. Vui lòng chọn lớp khác.");
-            return; // Dừng, không cho đăng ký
+        if (!formData.classId || !formData.session) {
+            setErrorMessage("Vui lòng chọn đầy đủ chi nhánh và thời gian học.");
+            return;
         }
-        // --- ▲▲▲ KẾT THÚC THÊM MỚI 2 ▲▲▲ ---
-
-
-        // (Nếu không trùng, tiếp tục xử lý đăng ký như cũ)
-        const selectedClassInfo = allClassData.find(c => c.slug === formData.classSlug);
-        const registrationData = {
-            ...formData,
-            className: selectedClassInfo ? selectedClassInfo.name : formData.classSlug,
-            price: selectedClassInfo ? selectedClassInfo.price : 'N/A'
+        const oldList = JSON.parse(localStorage.getItem("registrationList")) || [];
+        const selectedClassInfo = availableClasses.find(c => String(c.id) === String(formData.classId));
+        const payload = {
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            class_id: formData.classId,
+            session: formData.session // Gửi thêm thông tin buổi tập lên server
         };
-
-        const newList = [...oldList, registrationData];
-        localStorage.setItem("registrationList", JSON.stringify(newList));
-
-        console.log("Đăng ký thành công!", registrationData);
-        window.location.href = "/registration-info.html/";
+        fetch('/register.html/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (response.ok) {
+                const registrationData = { 
+                    ...formData, 
+                    className: selectedClassInfo ? `${selectedClassInfo.name} - ${selectedClassInfo.branch}` : "Lớp Yoga",
+                    sessionName: formData.session === "morning" ? "Sáng" : "Tối"
+                };
+                localStorage.setItem("registrationList", JSON.stringify([...oldList, registrationData]));
+                window.location.href = "/profile.html/";
+            } else {
+                setErrorMessage("Lỗi hệ thống khi gửi đăng ký.");
+            }
+        })
+        .catch(() => setErrorMessage("Lỗi kết nối server."));
     }
-
-    // Giao diện form
     return (
-        <div className="bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow space-y-6 max-w-lg mx-auto">
-                    <h2 className="text-3xl font-bold text-center text-[var(--text-dark)]">Thông Tin Đăng Ký</h2>
-
-                    {/* --- ▼▼▼ THÊM MỚI 3: Hiển thị lỗi (nếu có) ▼▼▼ --- */}
+        <div className="bg-gray-50 py-10">
+            <div className="max-w-7xl mx-auto px-4">
+                <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-lg space-y-5 max-w-lg mx-auto border border-gray-100">
+                    <h2 className="text-3xl font-bold text-center text-gray-800">Thông Tin Đăng Ký</h2>
                     {errorMessage && (
-                        <div className="p-3 rounded-lg bg-red-100 border border-red-400 text-red-700 text-center text-sm">
+                        <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-center text-sm font-medium animate-shake">
                             {errorMessage}
                         </div>
                     )}
-                    {/* --- ▲▲▲ KẾT THÚC THÊM MỚI 3 ▲▲▲ --- */}
-
-                    <input type="text" name="fullName" placeholder="Họ và tên" value={formData.fullName} onChange={handleChange} required className="input-field" />
-                    <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required className="input-field" />
-                    <input type="tel" name="phone" placeholder="Số điện thoại" value={formData.phone} onChange={handleChange} required className="input-field" />
-
-                    <label htmlFor="class-select" className="block text-sm font-medium text-[var(--text-light)] -mb-3">Chọn Lớp Học</label>
-                    <select
-                        name="classSlug"
-                        value={formData.classSlug}
-                        onChange={handleChange}
-                        required
-                        className="input-field"
-                        >
-                        <option value="">-- Vui lòng chọn lớp học --</option>
-                        {availableClasses.map(cls => (
-                            <option key={cls.slug} value={cls.slug}>
-                                {cls.name}
-                            </option>
-                        ))}
-                    </select>
-
-                    <button type="submit" className="btn-primary w-full">Đăng Ký Ngay</button>
+                    <div className="space-y-4">
+                        <input type="text" name="fullName" placeholder="Họ và tên" value={formData.fullName} onChange={handleChange} required className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
+                        <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
+                        <input type="tel" name="phone" placeholder="Số điện thoại" value={formData.phone} onChange={handleChange} required className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
+                        <div className="space-y-4 border-t pt-4">
+                            {/* 1. CHỌN LỚP */}
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">1. Chọn Lớp</label>
+                                <select value={formData.selectedClassName} onChange={handleClassChange} required className="w-full p-3.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer">
+                                    <option value="">-- Lớp học --</option>
+                                    {uniqueClassNames.map(name => <option key={name} value={name}>{name}</option>)}
+                                </select>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* 2. CHI NHÁNH */}
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">2. Chi nhánh</label>
+                                    <select name="classId" value={formData.classId} onChange={handleChange} disabled={!formData.selectedClassName} required className="w-full p-3.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-100 cursor-pointer">
+                                        <option value="">-- Chi nhánh --</option>
+                                        {filteredBranches.map(cls => <option key={cls.id} value={cls.id}>{cls.branch}</option>)}
+                                    </select>
+                                </div>
+                                {/* 3. THỜI GIAN (Sáng/Tối) */}
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">3. Thời gian</label>
+                                    <select name="session" value={formData.session} onChange={handleChange} disabled={!formData.classId} required className="w-full p-3.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-100 cursor-pointer">
+                                        <option value="">-- Buổi học --</option>
+                                        <option value="morning">Sáng (07:00 - 08:00)</option>
+                                        <option value="evening">Tối (19:00 - 20:00)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" className="w-full py-4 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold shadow-lg transition-all mt-4 transform active:scale-95">
+                        Đăng Ký Tham Gia
+                    </button>
                 </form>
             </div>
         </div>
     );
 }
-
-
 // --- Main App (Giữ nguyên) ---
 function RegisterAppMain() {
     const [user, setUser] = React.useState(JSON.parse(localStorage.getItem("user")) || null);
     const [selectedClassSlug, setSelectedClassSlug] = React.useState(null);
-
     React.useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const classSlug = params.get('slug');
@@ -149,36 +159,30 @@ function RegisterAppMain() {
             setSelectedClassSlug(classSlug);
         }
     }, []);
-
     const handleLogin = (userInfo) => {
         setUser(userInfo);
         localStorage.setItem("user", JSON.stringify(userInfo));
     };
-
     const handleLogout = () => {
         setUser(null);
         localStorage.removeItem("user");
         window.location.reload();
     };
-
     return (
         <NewRegistrationContent user={user} defaultSlug={selectedClassSlug} />
     );
 }
-
 // --- RENDER ĐA ĐIỂM (MULTI-ROOT) ---
 const containers = [
     { id: 'header-root', component: <HeaderSectionWrapper /> }, // Wrapper để xử lý login cho Header
     { id: 'register-app-root', component: <RegisterAppMain /> },
     { id: 'footer-root', component: <Footer /> }
 ];
-
 // Hàm tạo Wrapper cho Header để dùng chung state với RegisterApp nếu cần
 function HeaderSectionWrapper() {
     const [user, setUser] = React.useState(JSON.parse(localStorage.getItem("user")) || null);
     return <Header user={user} onLogin={(u) => {localStorage.setItem("user", JSON.stringify(u)); window.location.reload();}} onLogout={() => {localStorage.removeItem("user"); window.location.reload();}} />;
 }
-
 containers.forEach(item => {
     const el = document.getElementById(item.id);
     if (el) {

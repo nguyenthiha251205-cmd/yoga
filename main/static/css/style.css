@@ -1,0 +1,136 @@
+/* 1. ĐỊNH NGHĨA BIẾN SỐ (VARIABLES) */
+:root {
+    /* Bảng màu chính - SoraYoga Branding */
+    --primary-color: #7C9885;
+    --secondary-color: #E8F3E8;
+    --accent-color: #A8C4B5;
+    
+    /* Màu chữ và nền */
+    --text-dark: #2C3E37;
+    --text-light: #5F6F65;
+    --bg-light: #F8FBF9;
+    
+    /* Màu trạng thái */
+    --status-pending: #f97316;
+    --status-success: #059669;
+    --status-error: #ef4444;
+}
+
+/* 2. CÀI ĐẶT CƠ BẢN (BASE) */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-light);
+    line-height: 1.6;
+}
+
+[x-cloak] { 
+    display: none !important; 
+}
+
+/* 3. THÀNH PHẦN DÙNG CHUNG (COMPONENTS) */
+
+/* Nút bấm chính */
+.btn-primary {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(124, 152, 133, 0.3);
+}
+
+.btn-primary:active {
+    transform: scale(0.95);
+}
+
+/* Ô nhập liệu Form */
+.input-field, .form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.input-field:focus, .form-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(124, 152, 133, 0.15);
+}
+
+/* Card (Lớp học, Bài viết, Lịch tập) */
+.sora-card {
+    background-color: white;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.sora-card:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+    transform: translateY(-4px);
+}
+
+/* Tiêu đề phần (Section Title) */
+.section-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.section-divider {
+    width: 5rem;
+    height: 0.25rem;
+    background-color: var(--primary-color);
+    margin: 0 auto 2rem;
+}
+
+/* 4. ĐỊNH DẠNG NỘI DUNG BÀI VIẾT (CKEDITOR/BLOG) */
+.post-content p { margin-bottom: 1.25rem; }
+.post-content h2 { 
+    font-size: 1.5rem; 
+    font-weight: 700; 
+    margin-top: 2rem; 
+    margin-bottom: 1rem; 
+    color: var(--text-dark);
+}
+.post-content ul { 
+    list-style-type: disc; 
+    margin-left: 1.5rem; 
+    margin-bottom: 1.25rem; 
+}
+
+/* 5. TIỆN ÍCH BẢN ĐỒ (LEAFLET) */
+#map-container {
+    height: 550px;
+    width: 100%;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    z-index: 1;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}

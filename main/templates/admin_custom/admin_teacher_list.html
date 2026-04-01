@@ -1,0 +1,153 @@
+{% extends "admin_custom/base_admin.html" %}
+{% block admin_content %}
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Quản lý Đội ngũ Giáo viên</h1>
+        <p class="text-sm text-gray-500">Quản lý thông tin huấn luyện viên hiển thị trên trang chủ</p>
+    </div>
+    <button onclick="toggleModal('addTeacherModal')" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition flex items-center shadow-sm font-bold">
+        <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i> Thêm giáo viên
+    </button>
+</div>
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="w-full text-left border-collapse">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Ảnh</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Họ tên & Chức vụ</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Kinh nghiệm</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Chuyên môn</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Thứ tự</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase text-right">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for t in teachers %}
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="p-4">
+                    <img src="{{ t.image.url }}" alt="{{ t.name }}" class="w-12 h-12 rounded-full object-cover border border-gray-200">
+                </td>
+                <td class="p-4">
+                    <p class="font-bold text-gray-800">{{ t.name }}</p>
+                    <p class="text-xs text-emerald-600 font-medium">{{ t.title }}</p>
+                </td>
+                <td class="p-4 text-sm text-gray-600">{{ t.experience }}</td>
+                <td class="p-4 text-sm text-gray-600">{{ t.specialty }}</td>
+                <td class="p-4 text-sm text-gray-500 font-mono">{{ t.order }}</td>
+                <td class="p-4 text-right">
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" 
+                                onclick="openEditTeacherModal('{{ t.id }}', '{{ t.name|escapejs }}', '{{ t.title|escapejs }}', '{{ t.experience|escapejs }}', '{{ t.specialty|escapejs }}', '{{ t.order }}')" 
+                                class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        </button>
+                        <a href="{% url 'delete_teacher' t.id %}" onclick="return confirm('Xóa giáo viên này khỏi hệ thống?')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="p-8 text-center text-gray-400 italic">Chưa có giáo viên nào trong danh sách.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div id="addTeacherModal" class="fixed inset-0 bg-slate-900/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+        <div class="p-6 border-b bg-gray-50"><h2 class="text-xl font-bold text-gray-800">Thêm giáo viên mới</h2></div>
+        <form method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Họ và tên</label>
+                    <input type="text" name="name" required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Chức vụ</label>
+                    <input type="text" name="title" placeholder="VD: Huấn luyện viên" required class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Thứ tự hiển thị</label>
+                    <input type="number" name="order" value="0" class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Kinh nghiệm</label>
+                    <input type="text" name="experience" placeholder="VD: 5 năm kinh nghiệm" class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Chuyên môn</label>
+                    <input type="text" name="specialty" placeholder="VD: Hatha Yoga" class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Ảnh đại diện</label>
+                <input type="file" name="image" accept="image/*" required class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+            </div>
+            <div class="flex space-x-3 mt-6">
+                <button type="button" onclick="toggleModal('addTeacherModal')" class="flex-1 py-2.5 border rounded-xl hover:bg-gray-50">Hủy</button>
+                <button type="submit" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold">Lưu thông tin</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="editTeacherModal" class="fixed inset-0 bg-slate-900/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+        <div class="p-6 border-b bg-gray-50"><h2 class="text-xl font-bold text-gray-800">Cập nhật giáo viên</h2></div>
+        <form id="editTeacherForm" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Họ và tên</label>
+                    <input type="text" id="edit-name" name="name" required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Chức vụ</label>
+                    <input type="text" id="edit-title" name="title" required class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Thứ tự hiển thị</label>
+                    <input type="number" id="edit-order" name="order" class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Kinh nghiệm</label>
+                    <input type="text" id="edit-experience" name="experience" class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Chuyên môn</label>
+                    <input type="text" id="edit-specialty" name="specialty" class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Thay đổi ảnh (Để trống nếu giữ nguyên)</label>
+                <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+            </div>
+            <div class="flex space-x-3 mt-6">
+                <button type="button" onclick="toggleModal('editTeacherModal')" class="flex-1 py-2.5 border rounded-xl hover:bg-gray-50">Hủy</button>
+                <button type="submit" class="flex-1 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold">Cập nhật</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    function toggleModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.toggle('hidden');
+        modal.classList.toggle('flex');
+    }
+    function openEditTeacherModal(id, name, title, experience, specialty, order) {
+        const form = document.getElementById('editTeacherForm');
+        form.action = `/admin-custom/teachers/edit/${id}/`;
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-title').value = title;
+        document.getElementById('edit-experience').value = experience;
+        document.getElementById('edit-specialty').value = specialty;
+        document.getElementById('edit-order').value = order;
+        toggleModal('editTeacherModal');
+    }
+</script>
+{% endblock %}

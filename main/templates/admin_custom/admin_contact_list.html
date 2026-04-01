@@ -1,0 +1,146 @@
+{% extends 'admin_custom/base_admin.html' %}
+{% block admin_content %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-100">
+    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+        <h2 class="text-xl font-bold text-gray-800">Hòm thư khách hàng</h2>
+        <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold">
+            Tổng: {{ messages_list.count }} tin nhắn
+        </span>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
+                <tr>
+                    <th class="px-6 py-4">Khách hàng</th>
+                    <th class="px-6 py-4">Tiêu đề & Nội dung</th>
+                    <th class="px-6 py-4">Trạng thái</th>
+                    <th class="px-6 py-4">Thời gian</th>
+                    <th class="px-6 py-4 text-center">Hành động</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-sm">
+                {% for msg in messages_list %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="font-semibold text-gray-900">{{ msg.full_name }}</div>
+                        <div class="text-xs text-gray-500">{{ msg.email }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-emerald-600">{{ msg.subject }}</div>
+                        <div class="text-gray-600 italic truncate max-w-xs">{{ msg.message }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if msg.is_replied %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                <span class="w-1 h-1 mr-1.5 rounded-full bg-emerald-500"></span>
+                                Đã trả lời
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                <span class="w-1 h-1 mr-1.5 rounded-full bg-amber-500"></span>
+                                Đang chờ
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">{{ msg.created_at|date:"H:i - d/m/Y" }}</td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex justify-center gap-3">
+                            <button onclick="openReplyModal(
+                                '{{ msg.id }}', 
+                                '{{ msg.email }}', 
+                                '{{ msg.full_name|escapejs }}', 
+                                '{{ msg.subject|escapejs }}', 
+                                '{{ msg.message|escapejs }}', 
+                                '{{ msg.created_at|date:'H:i - d/m/Y' }}')" 
+                                class="text-emerald-500 hover:text-emerald-700 transition-colors" title="Xem & Phản hồi">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
+                            <a href="{% url 'delete_contact_msg' msg.id %}" 
+                               onclick="return confirm('Xóa tin nhắn này?')"
+                               class="text-red-500 hover:text-red-700 transition-colors" title="Xóa">
+                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-10 text-center text-gray-400">Không có tin nhắn nào.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div id="replyModal" class="fixed inset-0 bg-slate-900/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden transform transition-all">
+        <div class="p-6 border-b bg-gray-50 flex justify-between items-center">
+            <h2 class="text-xl font-bold text-gray-800">Chi tiết tin nhắn & Phản hồi</h2>
+            <button onclick="closeReplyModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <div class="p-6 max-h-[80vh] overflow-y-auto">
+            <div class="mb-6 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                <div class="flex justify-between mb-2">
+                    <span id="view-name" class="font-bold text-emerald-900"></span>
+                    <span id="view-time" class="text-xs text-emerald-600"></span>
+                </div>
+                <div class="text-xs font-bold text-emerald-700 uppercase mb-1">Tiêu đề: <span id="view-subject" class="normal-case font-medium"></span></div>
+                <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap" id="view-message"></div>
+            </div>
+            <hr class="mb-6 border-dashed">
+            <form method="POST" action="{% url 'reply_contact_msg' %}" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" id="reply-id" name="msg_id">
+                <input type="hidden" id="reply-email" name="email">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Nội dung phản hồi của SoraYoga:</label>
+                    <textarea name="reply_message" required 
+                              class="w-full p-3 border border-gray-200 rounded-lg h-32 focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                              placeholder="Nhập nội dung tư vấn cho khách..."></textarea>
+                </div>
+                <div class="flex space-x-3 mt-4">
+                    <button type="button" onclick="closeReplyModal()" 
+                            class="flex-1 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 font-semibold text-gray-600">
+                        Đóng
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold shadow-lg shadow-emerald-200 flex justify-center items-center gap-2">
+                        <i data-lucide="send" class="w-4 h-4"></i> Gửi phản hồi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function openReplyModal(id, email, name, subject, message, time) {
+        document.getElementById('view-name').innerText = name || "Khách hàng";
+        document.getElementById('view-subject').innerText = subject || "Không có tiêu đề";
+        document.getElementById('view-message').innerText = message || "Nội dung trống";
+        document.getElementById('view-time').innerText = time || "";
+        document.getElementById('reply-id').value = id;
+        document.getElementById('reply-email').value = email;
+        const modal = document.getElementById('replyModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeReplyModal() {
+        const modal = document.getElementById('replyModal');
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+    window.onclick = function(event) {
+        const modal = document.getElementById('replyModal');
+        if (event.target == modal) {
+            closeReplyModal();
+        }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
+</script>
+{% endblock %}

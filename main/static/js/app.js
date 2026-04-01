@@ -1,20 +1,16 @@
-// app.js (Đã cập nhật để chia sẻ trạng thái đăng nhập - Đã sửa lỗi cú pháp)
-
-// --- ErrorBoundary (Giữ nguyên) ---
+// app.js (PHIÊN BẢN CẬP NHẬT: ĐỒNG BỘ USER TOÀN SITE)
+// --- ErrorBoundary ---
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null };
   }
-
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
-
   componentDidCatch(error, errorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo.componentStack);
   }
-
   render() {
     if (this.state.hasError) {
       return (
@@ -22,9 +18,7 @@ class ErrorBoundary extends React.Component {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Đã xảy ra lỗi</h1>
             <p className="text-gray-600 mb-4">Vui lòng tải lại trang</p>
-            <button onClick={() => window.location.reload()} className="btn-primary">
-              Tải Lại
-            </button>
+            <button onClick={() => window.location.reload()} className="btn-primary">Tải Lại</button>
           </div>
         </div>
       );
@@ -32,59 +26,61 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
-
-// --- Main App (Đã cập nhật) ---
+// --- 1. Component Header riêng biệt (Dùng cho mọi trang) ---
+function HeaderApp() {
+  // Lấy User từ Django Config truyền qua base.html
+  const djangoUser = window.siteConfig?.currentUser || null;
+  const [user, setUser] = React.useState(djangoUser);
+  // Đồng bộ hóa State nếu Django Session thay đổi (ví dụ sau khi login/logout)
+  React.useEffect(() => {
+    if (djangoUser !== user) {
+      setUser(djangoUser);
+    }
+  }, [djangoUser]);
+  return <Header user={user} setUser={setUser} />;
+}
+// --- 2. Component Nội dung Trang Chủ ---
 function App() {
   try {
-
-    // --- BƯỚC 1: Đọc 'user' từ localStorage ---
-    const [user, setUser] = React.useState(JSON.parse(localStorage.getItem("user")) || null);
-
-    // --- BƯỚC 2: Thêm hàm handleLogin ---
-    function handleLogin(userInfo) {
-      setUser(userInfo);
-      localStorage.setItem("user", JSON.stringify(userInfo));
-      // Không reload, chỉ cập nhật state
-    }
-
-    // --- BƯỚC 3: Thêm hàm handleLogout ---
-    function handleLogout() {
-      setUser(null);
-      localStorage.removeItem("user");
-      // Tải lại trang để đảm bảo Header cập nhật đúng
-      window.location.reload();
-    }
-
     return (
-      <div className="min-h-screen" data-name="app" data-file="app.js">
-        {/* --- BƯỚC 4: Truyền onLogin, onLogout, user cho Header --- */}
-        <Header user={user} onLogout={handleLogout} onLogin={handleLogin} />
-
-        {/* Các component nội dung của bạn (giữ nguyên) */}
+      <div className="min-h-screen" data-name="app">
+        {/* Header đã được tách ra HeaderApp, không render ở đây nữa */}
         <Hero />
-        <section id="about"><AboutContent /></section>
+        <section id="about">
+          <AboutContent />
+        </section>
         <Features />
-        {/* <Teachers /> */}      {/* Ẩn tạm thời để không bị lỗi ReferenceError */}
-        {/* <Testimonials /> */}
-        {/* <Newsletter /> */}
+        <Teachers />
         <Footer />
       </div>
     );
   } catch (error) {
     console.error('App component error:', error);
-    // (Phần catch error của bạn)
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Lỗi khi tải App.js, kiểm tra console.</p>
+        <p className="text-red-600 font-bold">Lỗi khi tải nội dung trang chủ.</p>
       </div>
     );
   }
 }
-
-// --- Render (Giữ nguyên) ---
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <ErrorBoundary>
-    <App />
-  </ErrorBoundary>
-);
+// --- 3. Thực thi Render ---
+// Render Header vào 'header-root' - Cái này trang nào cũng có vì nằm trong base.html
+const headerRootElement = document.getElementById('header-root');
+if (headerRootElement) {
+  const hRoot = ReactDOM.createRoot(headerRootElement);
+  hRoot.render(
+    <ErrorBoundary>
+      <HeaderApp />
+    </ErrorBoundary>
+  );
+}
+// Chỉ render App (Trang chủ) nếu tìm thấy id="root" (Chỉ có ở index.html)
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  );
+}

@@ -62,7 +62,7 @@ function ContactContent() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-[var(--text-dark)]">Địa Chỉ Của Chúng Tôi</h4>
-                    <p className="text-[var(--text-light)]">189 - 191 Đ. Quang Trung, TT. Hóc Môn, Hóc Môn, Thành phố Hồ Chí Minh</p>
+                    <p className="text-[var(--text-light)]">Xuân Thới Thượng 1, Xã Bà Điểm, Thành phố Hồ Chí Minh</p>
                   </div>
                 </div>
 

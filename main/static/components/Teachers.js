@@ -30,24 +30,32 @@ function Teachers() {
         image: 'static/images/Anh Long.png'
       }
     ];
-
     return (
-      <section className="py-20 bg-white" data-name="teachers" data-file="components/Teachers.js">
+      <section className="py-20 bg-gray-50" data-name="teachers">
         <div className="container mx-auto px-4">
+          {/* Giữ nguyên phần Header */}
           <div className="text-center mb-16">
-            <h2 className="section-title">Đội Ngũ Giáo Viên</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--text-dark)]">Đội Ngũ Giáo Viên</h2>
             <p className="text-lg text-[var(--text-light)] max-w-2xl mx-auto">
-              Được hướng dẫn bởi những giáo viên có chứng chỉ quốc tế và giàu kinh nghiệm
+              Đội ngũ chuyên gia giàu tâm huyết, đồng hành cùng bạn trên con đường tìm kiếm sự bình yên.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
             {teachers.map((teacher, index) => (
-              <div key={index} className="text-center">
-                <img src={teacher.image} alt={teacher.name} className="w-48 h-48 rounded-full mx-auto mb-4 object-cover shadow-lg" />
+              <div key={index} className="group bg-white p-6 rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500">
+                <div className="relative mb-6 overflow-hidden rounded-2xl">
+                  {/* Sử dụng template literal cho image nếu cần */}
+                  <img src={teacher.image} alt={teacher.name} className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+                     <span className="text-white text-sm font-medium px-4 py-1 border border-white rounded-full cursor-pointer">Xem Profile</span>
+                  </div>
+                </div>
                 <h3 className="text-xl font-bold mb-1 text-[var(--text-dark)]">{teacher.name}</h3>
-                <p className="text-[var(--primary-color)] font-medium mb-2">{teacher.title}</p>
-                <p className="text-sm text-[var(--text-light)] mb-1">{teacher.experience}</p>
-                <p className="text-sm text-[var(--text-light)]">{teacher.specialty}</p>
+                <p className="text-[var(--primary-color)] font-semibold text-sm mb-3 uppercase tracking-widest">{teacher.title}</p>
+                <div className="pt-3 border-t border-gray-100">
+                   <p className="text-xs text-gray-500 italic mb-1">{teacher.experience}</p>
+                   <p className="text-sm font-medium text-[var(--text-dark)]">{teacher.specialty}</p>
+                </div>
               </div>
             ))}
           </div>

@@ -1,0 +1,135 @@
+{% extends "admin_custom/base_admin.html" %}
+{% block admin_content %}
+<div class="mb-6">
+    <a href="{% url 'admin_class_list' %}" class="text-sm text-emerald-600 hover:underline flex items-center">
+        <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i> Quay lại danh sách lớp
+    </a>
+    <h1 class="text-2xl font-bold text-gray-800 mt-2">Lịch học: {{ yoga_class.name }}</h1>
+    <div class="flex items-center text-gray-500 mt-1">
+        <i data-lucide="map-pin" class="w-4 h-4 mr-1"></i>
+        <span>{{ yoga_class.branch.name }}</span>
+    </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit">
+        <h3 class="font-bold text-gray-700 mb-4 flex items-center">
+            <i data-lucide="clock-plus" class="w-5 h-5 mr-2 text-emerald-600"></i> Thêm khung giờ
+        </h3>
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Thứ trong tuần</label>
+                <select name="day" class="w-full p-2.5 border rounded-lg outline-none transition-all">
+                    {% for val, label in days %}
+                    <option value="{{ val }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Bắt đầu</label>
+                    <input type="time" name="start_time" required class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kết thúc</label>
+                    <input type="time" name="end_time" required class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg hover:bg-emerald-700 font-bold transition-colors shadow-sm">
+                Thêm lịch tập
+            </button>
+        </form>
+    </div>
+    <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 border-b">
+                <tr>
+                    <th class="p-4 text-xs font-bold text-gray-500 uppercase">Thứ</th>
+                    <th class="p-4 text-xs font-bold text-gray-500 uppercase">Thời gian</th>
+                    <th class="p-4 text-xs font-bold text-gray-500 uppercase text-right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for s in schedules %}
+                <tr class="hover:bg-gray-50/50 transition-colors">
+                    <td class="p-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold {% if s.day_of_week == 8 %} bg-red-100 text-red-700 {% else %} bg-slate-100 text-slate-700 {% endif %}">
+                            {{ s.get_day_of_week_display }}
+                        </span>
+                    </td>
+                    <td class="p-4 text-gray-700 font-medium">
+                        {{ s.start_time|time:"H:i" }} <span class="text-gray-400 mx-1">-</span> {{ s.end_time|time:"H:i" }}
+                    </td>
+                    <td class="p-4 text-right">
+                        <div class="flex justify-end space-x-2">
+                            <button onclick="openEditScheduleModal('{{ s.id }}', '{{ s.day_of_week }}', '{{ s.start_time|time:'H:i' }}', '{{ s.end_time|time:'H:i' }}')" 
+                                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+                            <a href="{% url 'delete_schedule' s.id %}" onclick="return confirm('Bạn có chắc chắn muốn xóa khung giờ này?')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg inline-block">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div id="editScheduleModal" class="fixed inset-0 bg-slate-900/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+        <div class="p-6 border-b bg-gray-50 flex justify-between items-center">
+            <h2 class="text-lg font-bold text-gray-800">Cập nhật lịch tập</h2>
+            <button onclick="toggleModal('editScheduleModal')" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <form id="editScheduleForm" method="POST" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Thứ</label>
+                <select id="edit-day" name="day" class="w-full p-2.5 border rounded-lg outline-none">
+                    {% for val, label in days %}
+                    <option value="{{ val }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Bắt đầu</label>
+                    <input type="time" id="edit-start" name="start_time" required class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kết thúc</label>
+                    <input type="time" id="edit-end" name="end_time" required class="w-full p-2.5 border rounded-lg outline-none">
+                </div>
+            </div>
+            <div class="flex space-x-3 mt-4">
+                <button type="button" onclick="toggleModal('editScheduleModal')" class="flex-1 py-2 border rounded-xl hover:bg-gray-50">Hủy</button>
+                <button type="submit" class="flex-1 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold">Cập nhật</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="https://cdn.ckeditor.com/4.19.1/standard/ckeditor.js"></script>
+<script>
+    CKEDITOR.replace('add-description'); 
+    CKEDITOR.replace('edit-description');
+    function toggleModal(id) {
+        document.getElementById(id).classList.toggle('hidden');
+    }
+    function openEditScheduleModal(id, day, start, end) {
+        const form = document.getElementById('editScheduleForm');
+        // Bạn cần thêm đường dẫn update_schedule vào urls.py và views.py
+        form.action = `/admin-custom/schedule/update/${id}/`;
+        document.getElementById('edit-day').value = day;
+        document.getElementById('edit-start').value = start;
+        document.getElementById('edit-end').value = end;
+        toggleModal('editScheduleModal');
+        if (CKEDITOR.instances['edit-description']) {
+            CKEDITOR.instances['edit-description'].setData(description);
+        }
+        toggleModal('editClassModal');
+    }
+    lucide.createIcons();
+</script>
+{% endblock %}
