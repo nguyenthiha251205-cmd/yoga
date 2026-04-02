@@ -1,0 +1,20 @@
+# Môi trường ảo (Đây là cái gây lỗi "No Python at...")
+.venv/
+venv/
+env/
+ENV/
+
+# File tạm của Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database cục bộ (nên để mỗi máy tự chạy)
+db.sqlite3
+
+# Thư mục chứa các file upload của người dùng (nếu có)
+media/
+
+# Các file cấu hình riêng tư
+.env
