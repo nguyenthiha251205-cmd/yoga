@@ -1,20 +1,9 @@
 function AboutContent() {
   try {
     return (
-      <div className="pt-24" data-name="about-content" data-file="components/AboutContent.js">
-        <section className="py-20 bg-gradient-to-br from-[var(--bg-light)] to-[var(--secondary-color)]">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 text-[var(--text-dark)]">SoraYoga</h1>
-              <p className="text-xl text-[var(--text-light)] leading-relaxed">
-                SoraYoga được thành lập với sứ mệnh mang đến một không gian thư giãn, nơi mọi người có thể
-                kết nối với chính mình và khám phá sức mạnh nội tại thông qua thực hành Yoga.
-              </p>
-            </div>
-          </div>
-        </section>
+      <div className="pt-0" data-name="about-content" data-file="components/AboutContent.js">
 
-        <section className="py-20 bg-white">
+        <section className="py-0 pb-10 bg-white">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
               <div>
@@ -70,7 +59,7 @@ function AboutContent() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
               <div>
-                <img src="components/images/khonggiancuachungtoi.jpg"
+                <img src="/static/images/khonggiancuachungtoi.jpg"
                   alt="Không gian SoraYoga" className="rounded-2xl shadow-xl" />
               </div>
               <div>
@@ -91,7 +80,8 @@ function AboutContent() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center p-6">
                 <div className="w-16 h-16 rounded-full bg-[var(--secondary-color)] flex items-center justify-center mx-auto mb-4">
-                  <div className="icon-target text-2xl text-[var(--primary-color)]"></div>
+                  {/* Icon Sứ Mệnh - Hình mục tiêu */}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                 </div>
                 <h3 className="text-xl font-bold mb-3 text-[var(--text-dark)]">Sứ Mệnh</h3>
                 <p className="text-[var(--text-light)]">
@@ -101,17 +91,19 @@ function AboutContent() {
               </div>
               <div className="text-center p-6">
                 <div className="w-16 h-16 rounded-full bg-[var(--secondary-color)] flex items-center justify-center mx-auto mb-4">
-                  <div className="icon-eye text-2xl text-[var(--primary-color)]"></div>
+                  {/* Icon Tầm Nhìn - Hình con mắt */}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                 </div>
                 <h3 className="text-xl font-bold mb-3 text-[var(--text-dark)]">Tầm Nhìn</h3>
                 <p className="text-[var(--text-light)]">
                   Trở thành biểu tượng của Yoga chánh niệm tại Việt Nam, lan tỏa một cộng đồng
-                  sống khỏe mạnh, tích cực và tìm thấy sự cân bằng đích thực trong cuộc sống hiện đại.
+                   sống khỏe mạnh, tích cực và tìm thấy sự cân bằng đích thực trong cuộc sống hiện đại.
                 </p>
               </div>
               <div className="text-center p-6">
                 <div className="w-16 h-16 rounded-full bg-[var(--secondary-color)] flex items-center justify-center mx-auto mb-4">
-                  <div className="icon-heart text-2xl text-[var(--primary-color)]"></div>
+                  {/* Icon Giá Trị - Hình trái tim */}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.505 4.046 3 5.5L12 21Z"/></svg>
                 </div>
                 <h3 className="text-xl font-bold mb-3 text-[var(--text-dark)]">Giá Trị</h3>
                 <p className="text-[var(--text-light)]">

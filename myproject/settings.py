@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- CẤU HÌNH GDAL/GEOS LINH HOẠT CHO WINDOWS ---
 # 1. Thử tìm trong môi trường ảo (venv) trước - Ưu tiên máy của bạn hiện tại
-VENV_OSGEO = os.path.join(BASE_DIR, 'venv', 'Lib', 'site-packages', 'osgeo')
+VENV_OSGEO = os.path.join(BASE_DIR, '.venv', 'Lib', 'site-packages', 'osgeo')
 
 if os.path.exists(VENV_OSGEO):
     # Thêm thư mục osgeo vào PATH hệ thống

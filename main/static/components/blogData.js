@@ -163,7 +163,7 @@ const blogPosts = [
         id: 3,
         slug: "hatha-va-vinyasa-yoga",
         title: "Hatha vs. Vinyasa Yoga: Phân Tích Chuyên Sâu Giúp Bạn Lựa Chọn",
-        image: "components/images/blog3.jpg",
+        image: "/static/images/blog3.jpg",
         excerpt: "Hatha tĩnh lặng, Vinyasa linh hoạt. Hiểu rõ sự khác biệt cốt lõi để chọn phong cách Yoga phù hợp nhất với mục tiêu và tính cách của bạn.",
         publishDate: "18 Tháng 11, 2025",
         content: `
@@ -351,7 +351,7 @@ const blogPosts = [
         id: 5,
         slug: "suc-manh-cua-hoi-tho-pranayama",
         title: "Sức Mạnh Của Hơi Thở: Khám Phá Nghệ Thuật Pranayama Cổ Xưa",
-        image: "components/images/blog5.jpeg",
+        image: "/static/images/blog5.jpeg",
         excerpt: "Hơi thở là cầu nối giữa cơ thể và tâm trí. Khám phá Pranayama - nghệ thuật kiểm soát năng lượng sống - để làm chủ sức khỏe và cảm xúc của bạn.",
         publishDate: "25 Tháng 11, 2025",
         content: `
@@ -417,7 +417,7 @@ tức.</p>
         id: 6,
         slug: "thien-dinh-huong-dan-thuc-hanh",
         title: "Thiền Định (Meditation): Hướng Dẫn Thực Hành Từ Cơ Bản Đến Nâng Cao",
-        image: "components/images/blog6.jpg",
+        image: "/static/images/blog6.jpg",
         excerpt: "Thiền không phải là 'dừng suy nghĩ', mà là học cách quan sát chúng. Khám phá hướng dẫn từng bước để bắt đầu và duy trì thực hành thiền định.",
         publishDate: "28 Tháng 11, 2025",
         content: `
@@ -494,7 +494,7 @@ tức.</p>
         id: 7,
         slug: "ashtanga-yoga-hanh-trinh-ky-luat",
         title: "Ashtanga Yoga: Hành Trình Luyện Tập Kỷ Luật Cho Thân Và Tâm",
-        image: "components/images/blog7.jpg",
+        image: "/static/images/blog7.jpg",
         excerpt: "Ashtanga không chỉ là một buổi tập, đó là một thực hành hàng ngày. Khám phá hệ thống Yoga năng động, kỷ luật đã làm thay đổi hàng triệu cuộc đời.",
         publishDate: "02 Tháng 12, 2025",
         content: `
@@ -575,7 +575,7 @@ tức.</p>
         id: 8,
         slug: "yoga-phuc-hoi-restorative-yoga",
         title: "Yoga Phục Hồi (Restorative Yoga): Nghệ Thuật Của Việc Thư Giãn Sâu",
-        image: "components/images/blog8.webp",
+        image: "/static/images/blog8.webp",
         excerpt: "Trong một thế giới tôn vinh sự 'bận rộn', Yoga Phục Hồi là một hành động dũng cảm. Học cách 'không làm gì' để chữa lành sâu sắc từ bên trong.",
         publishDate: "05 Tháng 12, 2025",
         content: `
@@ -629,7 +629,7 @@ tức.</p>
         id: 9,
         slug: "kham-pha-yin-yoga",
         title: "Khám Phá Yin Yoga: Đi Sâu Vào Các Mô Liên Kết và Sự Tĩnh Lặng",
-        image: "components/images/blog9.jpg",
+        image: "/static/images/blog9.jpg",
         excerpt: "Yin Yoga không phải là Restorative Yoga. Đó là một thực hành chủ động của sự tĩnh lặng, nhắm vào các mô liên kết sâu để giải phóng sự linh hoạt tiềm ẩn.",
         publishDate: "11 Tháng 12, 2025",
         content: `
@@ -714,7 +714,7 @@ tức.</p>
         id: 10,
         slug: "xay-dung-thoi-quen-yoga-hang-ngay",
         title: "Xây Dựng Thói Quen Tập Yoga Hàng Ngày: Bí Quyết Vàng Để Duy Trì Động Lực",
-        image: "components/images/blog10.jpg",
+        image: "/static/images/blog10.jpg",
         excerpt: "Bắt đầu rất dễ, duy trì mới là điều khó. Khám phá những bí quyết tâm lý và chiến lược thực tế để biến Yoga từ 'việc nên làm' thành 'điều không thể thiếu'.",
         publishDate: "15 Tháng 12, 2025",
         content: `

@@ -44,7 +44,7 @@
                 <i data-lucide="graduation-cap" class="w-5 h-5"></i>
                 <span class="font-medium">Đội ngũ Giáo viên</span>
             </a>
-            <a href="{% url 'admin_blog_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'admin_blog_list' %}sidebar-item-active{% endif %}">
+<a href="{% url 'admin_blog_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'admin_blog_list' %}sidebar-item-active{% endif %}">
                 <i data-lucide="file-text" class="w-5 h-5"></i>
                 <span class="font-medium">Bài viết (Blog)</span>
             </a>
@@ -86,7 +86,7 @@
         <main class="p-8 flex-grow">
             {% if messages %}
                 {% for message in messages %}
-                <div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-700{% endif %} flex justify-between items-center shadow-sm border border-current/20">
+<div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-700{% endif %} flex justify-between items-center shadow-sm border border-current/20">
                     <span>{{ message }}</span>
                     <button onclick="this.parentElement.remove()" class="opacity-50 hover:opacity-100 text-xl font-bold">&times;</button>
                 </div>

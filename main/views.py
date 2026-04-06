@@ -1,6 +1,8 @@
 import json
 import datetime
 from django.shortcuts import render, get_object_or_404, redirect
+
+from myproject.settings import BASE_DIR
 from .models import BlogPost, Branch, YogaClass, ClassSchedule, Booking, ContactMessage, Profile, Teacher
 from django.contrib import messages
 from django.core.mail import send_mail
@@ -15,6 +17,96 @@ from django.db import IntegrityError
 # --- KIỂM TRA QUYỀN (Chỉ còn Admin là quyền cao nhất) ---
 def is_admin(user):
     return user.is_authenticated and user.is_superuser
+# --- 1. TRANG DANH SÁCH & THÊM GIÁO VIÊN ---
+@login_required
+@user_passes_test(is_admin)
+def admin_teacher_list(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        title = request.POST.get('title')
+        experience = request.POST.get('experience')
+        specialty = request.POST.get('specialty')
+        order = request.POST.get('order') or 0
+        image = request.FILES.get('image')
+
+        if name and title and image:
+            Teacher.objects.create(
+                name=name,
+                title=title,
+                experience=experience,
+                specialty=specialty,
+                order=order,
+                image=image
+            )
+            messages.success(request, f"Đã thêm giáo viên {name} thành công!")
+            return redirect('admin_teacher_list')
+
+    teachers = Teacher.objects.all().order_by('order')
+    return render(request, 'admin_custom/admin_teacher_list.html', {'teachers': teachers})
+
+# --- 2. CHỈNH SỬA GIÁO VIÊN ---
+@login_required
+@user_passes_test(is_admin)
+def edit_teacher(request, teacher_id):
+    teacher = get_object_or_404(Teacher, id=teacher_id)
+    if request.method == 'POST':
+        teacher.name = request.POST.get('name')
+        teacher.title = request.POST.get('title')
+        teacher.experience = request.POST.get('experience')
+        teacher.specialty = request.POST.get('specialty')
+        teacher.order = request.POST.get('order') or 0
+        
+        new_image = request.FILES.get('image')
+        if new_image:
+            teacher.image = new_image
+            
+        teacher.save()
+        messages.success(request, f"Đã cập nhật thông tin giáo viên {teacher.name}")
+        return redirect('admin_teacher_list')
+    return redirect('admin_teacher_list')
+
+# --- 3. XÓA GIÁO VIÊN ---
+@login_required
+@user_passes_test(is_admin)
+def delete_teacher(request, teacher_id):
+    teacher = get_object_or_404(Teacher, id=teacher_id)
+    name = teacher.name
+    teacher.delete()
+    messages.success(request, f"Đã xóa giáo viên {name} khỏi hệ thống.")
+    return redirect('admin_teacher_list')
+
+# --- 4. API LẤY DỮ LIỆU CHO REACT (Sửa lỗi 500) ---
+def get_teachers_api(request):
+    try:
+        teachers = Teacher.objects.all().order_by('order')
+        data = []
+        for t in teachers:
+            data.append({
+                'id': t.id,
+                'name': t.name,
+                'title': t.title,
+                'experience': t.experience,
+                'specialty': t.specialty,
+                'image': t.image.url if t.image else '/static/images/default-teacher.png'
+            })
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+# --- 5. TRANG CHỦ (Đồng bộ JSON) ---
+def home_view(request):
+    teachers = Teacher.objects.all().order_by('order')
+    teachers_data = [{
+        'name': t.name,
+        'title': t.title,
+        'experience': t.experience,
+        'specialty': t.specialty,
+        'image': t.image.url if t.image else '/static/images/default-teacher.png'
+    } for t in teachers]
+    
+    return render(request, 'index.html', {
+        'teachers_json': json.dumps(teachers_data)
+    })
 # --- XÁC THỰC (LOGIN/LOGOUT) ---
 @csrf_exempt
 def login_custom(request):
@@ -41,6 +133,7 @@ def logout_custom(request):
     logout(request)
     return redirect('/')
 # --- ĐĂNG KÝ TÀI KHOẢN KHÁCH HÀNG ---
+
 @csrf_exempt
 def register_account_api(request):
     if request.method == 'POST':
@@ -472,3 +565,11 @@ def map_view(request):
         "lat": b.location.y, "lng": b.location.x
     } for b in branches]
     return render(request, "map.html", {"branches_json": json.dumps(data)})
+# settings.py
+
+STATIC_URL = 'static/'
+
+# Dòng này báo cho Django biết nơi tìm các file JS, CSS, Hình ảnh của bạn
+STATICFILES_DIRS = [
+    BASE_DIR / "static", 
+]

@@ -7,6 +7,7 @@ urlpatterns = [
     # 🔐 XÁC THỰC (Login/Logout/Register)
     path('api/login/', views.login_custom, name='login_custom_api'),
     path('api/register-account/', views.register_account_api, name='register_account_api'),
+    path('api/teachers/', views.get_teachers_api, name='get_teachers_api'),
     path('logout-custom/', views.logout_custom, name='logout_custom'),
     path('register-account/', views.register_account_page, name='register_account_page'),
     # ⚙️ DJANGO ADMIN (Mặc định)
