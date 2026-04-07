@@ -44,7 +44,7 @@
                 <i data-lucide="graduation-cap" class="w-5 h-5"></i>
                 <span class="font-medium">Đội ngũ Giáo viên</span>
             </a>
-<a href="{% url 'admin_blog_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'admin_blog_list' %}sidebar-item-active{% endif %}">
+            <a href="{% url 'admin_blog_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition-colors {% if request.resolver_match.url_name == 'admin_blog_list' %}sidebar-item-active{% endif %}">
                 <i data-lucide="file-text" class="w-5 h-5"></i>
                 <span class="font-medium">Bài viết (Blog)</span>
             </a>
@@ -85,18 +85,17 @@
         </header>
         <main class="p-8 flex-grow">
             {% if messages %}
-                {% for message in messages %}
-<div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-700{% endif %} flex justify-between items-center shadow-sm border border-current/20">
-                    <span>{{ message }}</span>
-                    <button onclick="this.parentElement.remove()" class="opacity-50 hover:opacity-100 text-xl font-bold">&times;</button>
+                <div id="message-container">
+                    {% for message in messages %}
+                    <div class="message-item mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-700{% endif %} flex justify-between items-center shadow-sm border border-current/20 transition-opacity duration-500">
+                        <span>{{ message }}</span>
+                        <button onclick="this.parentElement.remove()" class="opacity-50 hover:opacity-100 text-xl font-bold">&times;</button>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             {% endif %}
             {% block admin_content %}{% endblock %}
         </main>
-        <footer class="p-4 bg-white border-t text-center text-gray-500 text-sm">
-            &copy; 2026 <strong>SoraYoga Admin</strong>. Hệ thống quản lý WebGIS.
-        </footer>
     </div>
     <script>
     window.siteConfig = {
@@ -104,7 +103,6 @@
         homeUrl: "{% url 'home' %}",
         currentUser: "{{ request.user.username|default:'' }}",
         isAuthenticated: {{ request.user.is_authenticated|yesno:"true,false" }},
-        // THÊM DÒNG NÀY: Lấy từ context_processor hoặc view truyền xuống
         yogaClasses: [
             {% for cls in global_classes %}
             { "name": "{{ cls.name }}", "slug": "{{ cls.slug }}" }{% if not forloop.last %},{% endif %}
@@ -113,6 +111,17 @@
     };
     const CSRF_TOKEN = "{{ csrf_token|escapejs }}";
     lucide.createIcons();
+
+    // Tự động tắt thông báo sau 3 giây
+    document.addEventListener('DOMContentLoaded', function() {
+        const messages = document.querySelectorAll('.message-item');
+        messages.forEach(msg => {
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                setTimeout(() => msg.remove(), 500);
+            }, 3000);
+        });
+    });
 </script>
     {% block extra_scripts %}{% endblock %}
 </body>

@@ -17,53 +17,94 @@ from django.db import IntegrityError
 # --- KIỂM TRA QUYỀN (Chỉ còn Admin là quyền cao nhất) ---
 def is_admin(user):
     return user.is_authenticated and user.is_superuser
-# --- 1. TRANG DANH SÁCH & THÊM GIÁO VIÊN ---
 @login_required
 @user_passes_test(is_admin)
 def admin_teacher_list(request):
+    branch_id = request.GET.get('branch')
+    
     if request.method == 'POST':
         name = request.POST.get('name')
-        title = request.POST.get('title')
-        experience = request.POST.get('experience')
-        specialty = request.POST.get('specialty')
-        order = request.POST.get('order') or 0
-        image = request.FILES.get('image')
+        branch_id_post = request.POST.get('branch')
+        working_branches_ids = request.POST.getlist('working_branches') 
 
-        if name and title and image:
-            Teacher.objects.create(
-                name=name,
-                title=title,
-                experience=experience,
-                specialty=specialty,
-                order=order,
-                image=image
-            )
-            messages.success(request, f"Đã thêm giáo viên {name} thành công!")
-            return redirect('admin_teacher_list')
+        # Tạo đối tượng nhưng chưa save vội để xử lý ảnh
+        teacher = Teacher.objects.create(
+            name=name,
+            title=request.POST.get('title'),
+            experience=request.POST.get('experience'),
+            specialty=request.POST.get('specialty'),
+            order=request.POST.get('order') or 0,
+            # Nếu branch_id_post rỗng (null/white space) thì gán None
+            branch_id=branch_id_post if branch_id_post and branch_id_post.strip() else None
+        )
+        
+        # Lưu ManyToMany
+        if working_branches_ids:
+            teacher.working_branches.set(working_branches_ids)
 
-    teachers = Teacher.objects.all().order_by('order')
-    return render(request, 'admin_custom/admin_teacher_list.html', {'teachers': teachers})
+        if request.FILES.get('image'):
+            teacher.image = request.FILES.get('image')
+            teacher.save()
+            
+        messages.success(request, "Thêm giáo viên thành công!")
+        return redirect('admin_teacher_list')
 
+    # Logic hiển thị
+    branches = Branch.objects.all()
+    # Dùng .distinct() để tránh trùng lặp bản ghi khi join với ManyToMany
+    teachers = Teacher.objects.all().prefetch_related('working_branches').order_by('order')
+
+    if branch_id:
+        from django.db.models import Q
+        teachers = teachers.filter(
+            Q(branch_id=branch_id) | Q(working_branches__id=branch_id)
+        ).distinct()
+        
+    return render(request, 'admin_teacher_list.html', {
+        'teachers': teachers,
+        'branches': branches,
+        'selected_branch': branch_id
+    })
 # --- 2. CHỈNH SỬA GIÁO VIÊN ---
 @login_required
 @user_passes_test(is_admin)
 def edit_teacher(request, teacher_id):
     teacher = get_object_or_404(Teacher, id=teacher_id)
     if request.method == 'POST':
+        # Cập nhật thông tin cơ bản
         teacher.name = request.POST.get('name')
         teacher.title = request.POST.get('title')
         teacher.experience = request.POST.get('experience')
         teacher.specialty = request.POST.get('specialty')
         teacher.order = request.POST.get('order') or 0
         
+        # --- DÒNG CÒN THIẾU: Cập nhật chi nhánh chính (cột branch_id) ---
+        branch_id_val = request.POST.get('branch')
+        # Django sẽ tự hiểu branch_id là cột database của field ForeignKey 'branch'
+        teacher.branch_id = branch_id_val if branch_id_val and branch_id_val.strip() else None
+
+        # Cập nhật ảnh nếu có file mới
         new_image = request.FILES.get('image')
         if new_image:
             teacher.image = new_image
             
-        teacher.save()
+        teacher.save() # Lưu các thay đổi cơ bản vào database
+
+        # --- DÒNG CÒN THIẾU: Cập nhật ManyToMany (nhiều chi nhánh) ---
+        working_branches_ids = request.POST.getlist('working_branches')
+        teacher.working_branches.set(working_branches_ids)
+        
         messages.success(request, f"Đã cập nhật thông tin giáo viên {teacher.name}")
-        return redirect('admin_teacher_list')
+        
+        # Quay lại trang danh sách và giữ bộ lọc nếu có
+        branch_filter = request.GET.get('branch', '')
+        url = redirect('admin_teacher_list').url
+        if branch_filter:
+            url += f'?branch={branch_filter}'
+        return redirect(url)
+        
     return redirect('admin_teacher_list')
+
 
 # --- 3. XÓA GIÁO VIÊN ---
 @login_required
@@ -288,13 +329,16 @@ def admin_class_list(request):
         price = request.POST.get('price')
         duration = request.POST.get('duration')
         branch_id = request.POST.get('branch')
+        teacher_id = request.POST.get('teacher')
         branch = get_object_or_404(Branch, id=branch_id)
-        YogaClass.objects.create(name=name, description=description, price=price, duration_minutes=duration, branch=branch)
+        teacher = Teacher.objects.filter(id=teacher_id).first() if teacher_id else None
+        YogaClass.objects.create(name=name, description=description, price=price, duration_minutes=duration, branch=branch, teacher=teacher)
         messages.success(request, f"Đã tạo lớp học: {name}")
         return redirect('admin_class_list')
-    classes = YogaClass.objects.select_related('branch').all()
+    classes = YogaClass.objects.select_related('branch', 'teacher').all()
     branches = Branch.objects.all()
-    return render(request, 'admin_custom/admin_class_list.html', {'classes': classes, 'branches': branches})
+    teachers = Teacher.objects.all()
+    return render(request, 'admin_custom/admin_class_list.html', {'classes': classes, 'branches': branches, 'teachers': teachers})
 @user_passes_test(is_admin, login_url='/')
 def edit_class(request, class_id):
     if request.method == 'POST':
@@ -304,7 +348,9 @@ def edit_class(request, class_id):
         yoga_class.price = request.POST.get('price')
         yoga_class.duration_minutes = request.POST.get('duration')
         branch_id = request.POST.get('branch')
+        teacher_id = request.POST.get('teacher')
         yoga_class.branch = get_object_or_404(Branch, id=branch_id)
+        yoga_class.teacher = Teacher.objects.filter(id=teacher_id).first() if teacher_id else None
         yoga_class.save()
         messages.success(request, f"Đã cập nhật lớp: {yoga_class.name}")
     return redirect('admin_class_list')

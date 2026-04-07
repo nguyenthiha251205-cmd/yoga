@@ -25,6 +25,7 @@ class YogaClass(models.Model):
     price = models.IntegerField(verbose_name="Học phí (VNĐ)") 
     duration_minutes = models.IntegerField(default=60)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='classes')
+    teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, blank=True, related_name='yoga_classes', verbose_name="Huấn luyện viên")
     def __str__(self):
         return f"{self.name} - {self.branch.name}"
 class ClassSchedule(models.Model):
@@ -129,6 +130,20 @@ class Teacher(models.Model):
     specialty = models.CharField(max_length=200, verbose_name="Chuyên môn chính")
     image = models.ImageField(upload_to='teacher_images/', verbose_name="Ảnh đại diện")
     order = models.IntegerField(default=0, verbose_name="Thứ tự hiển thị")
+    branch = models.ForeignKey(
+        Branch, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='teachers', 
+        verbose_name="Chi nhánh"
+    )
+    working_branches = models.ManyToManyField(
+        Branch, 
+        blank=True, 
+        related_name='working_teachers', 
+        verbose_name="Các chi nhánh làm việc"
+    )
     class Meta:
         verbose_name = "Giáo viên"
         verbose_name_plural = "Đội ngũ giáo viên"
