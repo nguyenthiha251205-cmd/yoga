@@ -3,6 +3,7 @@
 function BlogContent() {
   try {
     // Đọc bài viết trực tiếp từ file blogData.js đã được tải ở blog.html
+    console.log("Dữ liệu bài viết từ Database:", window.blogPosts);
     const posts = window.blogPosts || [];
 
     return (

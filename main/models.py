@@ -2,20 +2,51 @@ from django.utils.text import slugify
 from django.contrib.gis.db import models
 from django.contrib.auth.models import User
 from ckeditor.fields import RichTextField
+from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
 # --- Model Quản lý Chi nhánh (GIS) ---
+# models.py
+
 class Branch(models.Model):
     name = models.CharField(max_length=200, verbose_name="Tên chi nhánh")
     address = models.TextField(verbose_name="Địa chỉ")
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    # location giúp hiển thị trên map.html và BranchFinder.js
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Số điện thoại")
     location = models.PointField(srid=4326, verbose_name="Tọa độ không gian") 
-    image = models.ImageField(upload_to='branch_images/', blank=True, null=True)
+    image = models.ImageField(upload_to='branch_images/', blank=True, null=True, verbose_name="Hình ảnh")
+    
+    # --- THÊM CÁC TRƯỜNG MỚI CHO ADMIN ĐIỀN ---
+    is_active = models.BooleanField(default=True, verbose_name="Đang hoạt động")
+    opening_hours = models.CharField(max_length=100, default="08:00 - 21:00", verbose_name="Giờ mở cửa")
+
     class Meta:
         verbose_name = "Chi nhánh"
         verbose_name_plural = "Các chi nhánh"
+
     def __str__(self):
         return self.name
+
+# models.py - Cập nhật/Thêm mới Model BranchReview
+class BranchReview(models.Model):
+    
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='reviews', verbose_name="Chi nhánh")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Người đánh giá")
+    rating = models.IntegerField(
+    default=5, 
+    validators=[MinValueValidator(1), MaxValueValidator(5)], # Thêm dòng này
+    verbose_name="Số sao (1-5)"
+)
+    comment = models.TextField(verbose_name="Bình luận")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Ngày tạo")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Ngày cập nhật")
+
+class Meta:
+    verbose_name = "Đánh giá chi nhánh"
+    verbose_name_plural = "Các đánh giá chi nhánh"
+    unique_together = ('branch', 'user')
+    ordering = ['-created_at'] # Đánh giá mới nhất hiện lên trước
+
+    def __str__(self):
+        return f"{self.user.username} - {self.branch.name} ({self.rating}★)"
 # --- Model Quản lý Lớp học & Dịch vụ ---
 # models.py
 class YogaClass(models.Model):
@@ -50,7 +81,9 @@ class Booking(models.Model):
         ('confirmed', 'Thành công'),
         ('cancelled', 'Đã hủy'),
     ]
+    session = models.TextField(verbose_name="Khung giờ chọn", blank=True, null=True)
     # null=True để khách chưa có tài khoản vẫn đăng ký được
+    
     user = models.ForeignKey(User, related_name='bookings', on_delete=models.SET_NULL, null=True, blank=True)
     yoga_class = models.ForeignKey(YogaClass, on_delete=models.CASCADE)
     # Thông tin trực tiếp từ Form
@@ -76,6 +109,7 @@ class BlogPost(models.Model):
     category = models.CharField(max_length=100, blank=True)
     date_published = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True) 
+    is_published = models.BooleanField(default=True, verbose_name="Cho phép hiển thị")
     class Meta:
         ordering = ['-date_published']
         verbose_name = "Bài viết"

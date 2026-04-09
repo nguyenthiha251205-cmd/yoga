@@ -12,9 +12,7 @@ class ErrorBoundary extends React.Component {
 }
 // --- COMPONENT FORM ĐĂNG KÝ (BẢN CHUẨN) ---
 function NewRegistrationContent({ user, defaultSlug }) {
-    const rawData = window.dbClasses && window.dbClasses.length > 0 
-                    ? window.dbClasses 
-                    : (window.classData || []);
+    const rawData = window.dbClasses || [];
     const availableClasses = rawData.filter(c => c.slug !== 'workshop');
     const [formData, setFormData] = React.useState({
         fullName: user?.name || "",
@@ -22,7 +20,7 @@ function NewRegistrationContent({ user, defaultSlug }) {
         phone: "",
         selectedClassName: "", 
         classId: "",           
-        session: "", // Thêm trường buổi tập: Sáng hoặc Tối
+        session: [], 
     });
     const [errorMessage, setErrorMessage] = React.useState(null);
     const uniqueClassNames = [...new Set(availableClasses.map(c => c.name))];
@@ -67,11 +65,11 @@ function NewRegistrationContent({ user, defaultSlug }) {
         const oldList = JSON.parse(localStorage.getItem("registrationList")) || [];
         const selectedClassInfo = availableClasses.find(c => String(c.id) === String(formData.classId));
         const payload = {
-            fullName: formData.fullName,
-            email: formData.email,
-            phone: formData.phone,
-            class_id: formData.classId,
-            session: formData.session // Gửi thêm thông tin buổi tập lên server
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        class_id: formData.classId,
+        session: formData.session // // Gửi thêm thông tin buổi tập lên server
         };
         fetch('/register.html/', {
             method: 'POST',
@@ -128,15 +126,38 @@ function NewRegistrationContent({ user, defaultSlug }) {
                                         {filteredBranches.map(cls => <option key={cls.id} value={cls.id}>{cls.branch}</option>)}
                                     </select>
                                 </div>
-                                {/* 3. THỜI GIAN (Sáng/Tối) */}
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">3. Thời gian</label>
-                                    <select name="session" value={formData.session} onChange={handleChange} disabled={!formData.classId} required className="w-full p-3.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-100 cursor-pointer">
-                                        <option value="">-- Buổi học --</option>
-                                        <option value="morning">Sáng (07:00 - 08:00)</option>
-                                        <option value="evening">Tối (19:00 - 20:00)</option>
-                                    </select>
+                                {/* 3. THỜI GIAN  */}
+                               <div className="col-span-2">
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-3 ml-1">3. Chọn các khung giờ học</label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 border rounded-xl bg-gray-50">
+                                    {formData.classId ? (
+                                        availableClasses
+                                            .find(c => String(c.id) === String(formData.classId))
+                                            ?.times?.map((timeStr, index) => (
+                                                <label key={index} className="flex items-center space-x-3 p-3 bg-white border rounded-lg cursor-pointer hover:border-emerald-500 transition-all shadow-sm">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500"
+                                                        checked={formData.session.includes(timeStr)}
+                                                        onChange={(e) => {
+                                                            const checked = e.target.checked;
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                session: checked 
+                                                                    ? [...prev.session, timeStr] 
+                                                                    : prev.session.filter(s => s !== timeStr)
+                                                            }));
+                                                        }}
+                                                    />
+                                                    <span className="text-sm text-gray-700 font-medium">{timeStr}</span>
+                                                </label>
+                                            ))
+                                    ) : (
+                                        <p className="text-sm text-gray-400 italic p-2">Vui lòng chọn chi nhánh trước...</p>
+                                    )}
                                 </div>
+                            </div>
+
                             </div>
                         </div>
                     </div>

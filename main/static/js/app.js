@@ -1,4 +1,4 @@
-// app.js (PHIÊN BẢN CẬP NHẬT: CHỐNG TRÀN VIỀN & TỐI ƯU KHOẢNG CÁCH)
+// app.js (PHIÊN BẢN CẬP NHẬT: THÊM CHI NHÁNH NỔI BẬT)
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -45,17 +45,11 @@ function HeaderApp() {
   return <Header user={user} setUser={setUser} />;
 }
 
-// --- Component App: Quản lý bố cục chính ---
-// app.js
 function App() {
-  // Trạng thái ẩn/hiện nội dung (mặc định là false)
   const [showContent, setShowContent] = React.useState(false);
 
-  // Hàm kích hoạt hiện nội dung và cuộn xuống
   const handleToggleContent = () => {
     setShowContent(true); 
-    
-    // Đợi 100ms để React dựng xong các Section rồi mới cuộn
     setTimeout(() => {
       const nextSection = document.getElementById('about');
       if (nextSection) {
@@ -68,21 +62,16 @@ function App() {
     return (
       <div className="min-h-screen bg-white flex flex-col" data-name="app">
         
-        {/* Truyền Props vào Hero */}
         <Hero onShowMore={handleToggleContent} isContentVisible={showContent} />
         
-        {/* Khối nội dung bên dưới: Chỉ render khi showContent là true */}
         {showContent && (
           <div className="animate-fade-in transition-all duration-1000"> 
             
-           // --- App.js ---
-<section id="about" className="relative -mt-10 md:-mt-20 pt-10 md:pt-20 pb-4 bg-white overflow-visible"> 
-  {/* Giải thích: Thêm pt-10 (Mobile) và pt-20 (Máy tính) để tạo khoảng trống CHỨA TEXT, 
-      tránh text bị cắt khi Section được đẩy lên cao. */}
-  <div className="max-w-7xl mx-auto px-5 sm:px-16 lg:px-8">
-    <AboutContent />
-  </div>
-</section>
+            <section id="about" className="relative -mt-10 md:-mt-20 pt-10 md:pt-20 pb-4 bg-white overflow-visible"> 
+              <div className="max-w-7xl mx-auto px-5 sm:px-16 lg:px-8">
+                <AboutContent />
+              </div>
+            </section>
 
             <section id="features" className="py-10 md:py-24 bg-gray-50/50">
               <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -91,10 +80,12 @@ function App() {
             </section>
 
             <section id="teachers" className="py-5 md:py-15 bg-white">
-              <div className="max-w-3xl mx-auto px-4 sm:px-1 lg:px-2 mb-1">
-                 {/* Tiêu đề hoặc nội dung bổ trợ cho Teachers */}
-              </div>
               <Teachers />
+            </section>
+
+            {/* THÊM MỤC CHI NHÁNH NỔI BẬT VÀO ĐÂY */}
+            <section id="branches"> 
+              <FeaturedBranches />
             </section>
 
             <footer className="mt-auto border-t border-gray-100">
@@ -102,7 +93,7 @@ function App() {
             </footer>
 
           </div>
-        )}
+        )} {/* Kết thúc khối showContent */}
       </div>
     );
   } catch (error) {
@@ -110,8 +101,6 @@ function App() {
     return <div className="py-20 text-center">Đã xảy ra lỗi tải trang.</div>;
   }
 }
-
-// Giữ nguyên phần ErrorBoundary và ReactDOM.render phía dưới của bạn...
 
 // --- Thực thi Render ---
 const headerRootElement = document.getElementById('header-root');

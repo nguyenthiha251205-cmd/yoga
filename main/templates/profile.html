@@ -1,28 +1,44 @@
 {% extends "base.html" %}
 {% block content %}
+
+{% if messages %}
+<div class="max-w-6xl mx-auto px-4 mt-4">
+    {% for message in messages %}
+    <div class="p-4 rounded-2xl {% if message.tags == 'success' %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-700{% endif %} font-bold text-sm mb-4 flex items-center">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} mr-2"></i>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <style>
-    /* Tránh hiện tượng Modal bị hiện lên trong 0.5s đầu khi chưa load xong JS */
     [x-cloak] { display: none !important; }
-    /* Hiệu ứng mượt cho các nút */
-    .btn-transition { @apply transition-all duration-300 active:scale-95; }
+    /* Ẩn thanh cuộn nhưng vẫn cuộn được để giao diện sạch sẽ (tùy chọn) */
+    .scroll-container::-webkit-scrollbar { width: 4px; }
+    .scroll-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 </style>
-<div x-data="{ openModal: false }" class="bg-[#f8fafc] min-h-screen py-8">
+
+<div x-data="{ openModal: false, showNotify: false }" class="bg-[#f8fafc] min-h-screen py-8 overflow-hidden">
     <div class="max-w-6xl mx-auto px-4">
+        
         <div class="mb-6">
-            <a href="/" class="inline-flex items-center text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors group">
-                <i class="fas fa-arrow-left mr-2 transform group-hover:-translate-x-1 transition-transform"></i>
+            <a href="/" class="inline-flex items-center text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
                 Quay lại Trang chủ
             </a>
         </div>
+
         <div class="flex flex-col md:flex-row gap-8">
             <div class="w-full md:w-1/3">
-                <div class="bg-white rounded-[32px] p-8 shadow-sm border border-gray-100 text-center sticky top-24">
-                    <div class="w-24 h-24 bg-emerald-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4 shadow-inner">
+                <div class="bg-white rounded-[32px] p-8 shadow-sm border border-gray-100 text-center sticky top-8">
+                    <div class="w-24 h-24 bg-emerald-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4">
                         {{ user.username|first|upper }}
                     </div>
                     <h2 class="text-2xl font-bold text-gray-800">{{ user.first_name|default:user.username }}</h2>
                     <p class="text-gray-400 text-sm mb-6">{{ user.email }}</p>
+                    
                     <div class="space-y-3 text-left border-t border-gray-50 pt-6">
                         <div class="flex items-center text-sm">
                             <span class="text-gray-400 w-8"><i class="fas fa-phone"></i></span>
@@ -33,102 +49,109 @@
                             <span class="text-gray-700 font-medium">Gia nhập: {{ user.date_joined|date:"d/m/Y" }}</span>
                         </div>
                     </div>
-                    <button type="button" 
-                            @click="openModal = true" 
-                            class="w-full mt-8 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-black hover:shadow-lg transition-all transform active:scale-95 z-[100] relative">
+
+                    <button @click="openModal = true" class="w-full mt-8 py-4 bg-gray-900 text-white rounded-2xl font-bold">
                         Chỉnh sửa hồ sơ
                     </button>
                 </div>
             </div>
-            <div class="w-full md:w-2/3">
-                <div class="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="px-8 py-6 border-b border-gray-50 flex justify-between items-center bg-white/50 backdrop-blur-sm">
-                        <h3 class="text-xl font-bold text-gray-800">Khóa học của tôi</h3>
-                        <span class="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-xs font-extrabold">Tổng: {{ total_bookings }}</span>
+
+            <div class="w-full md:w-2/3 flex flex-col h-full">
+                <div class="flex justify-between items-center mb-6 px-4 shrink-0">
+                    <h3 class="text-2xl font-bold text-gray-800">Khóa học chính thức</h3>
+                    
+                    <div class="relative">
+                        <button @click="showNotify = !showNotify" class="relative p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+                            <i class="fas fa-bell text-gray-600 text-xl"></i>
+                            {% if pending_count > 0 %}
+                            <span class="absolute top-2 right-2 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
+                            {% endif %}
+                        </button>
+
+                        <div x-show="showNotify" @click.away="showNotify = false" x-cloak
+                             class="absolute right-0 mt-3 w-80 bg-white rounded-[24px] shadow-2xl border border-gray-100 z-50 overflow-hidden">
+                            <div class="p-4 border-b border-gray-50 bg-gray-50/50">
+                                <span class="text-xs font-bold text-gray-500 uppercase">Đăng ký mới</span>
+                            </div>
+                            <div class="max-h-60 overflow-y-auto">
+                                {% for b in bookings %}
+                                    {% if b.status != 'confirmed' and b.status != 'success' %}
+                                    <div class="p-4 border-b border-gray-50">
+                                        <div class="flex justify-between items-start">
+                                            <span class="text-sm font-bold text-gray-800">{{ b.yoga_class.name }}</span>
+                                            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded {% if b.status == 'pending' %}bg-orange-100 text-orange-600{% else %}bg-gray-100 text-gray-400{% endif %}">
+                                                {{ b.get_status_display }}
+                                            </span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-1 italic">Đăng ký: {{ b.booking_date|date:"d/m/Y" }}</p>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
-                    <div class="p-8 space-y-4">
+                </div>
+
+                <div class="scroll-container overflow-y-auto pr-2" style="max-height: calc(100vh - 250px);">
+                    <div class="space-y-6 pb-10">
                         {% for b in bookings %}
-                        <div class="group border border-gray-100 rounded-[24px] p-6 hover:border-emerald-200 hover:shadow-md transition-all duration-300">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="font-bold text-gray-800 text-lg group-hover:text-emerald-700 transition-colors">{{ b.yoga_class.name }}</h4>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <p class="text-sm text-gray-400"><i class="fas fa-map-marker-alt mr-1"></i> {{ b.yoga_class.branch.name }}</p>
-                                        <p class="text-sm text-gray-400"><i class="fas fa-calendar mr-1"></i> {{ b.booking_date|date:"d/m/Y" }}</p>
+                            {% if b.status == 'confirmed' or b.status == 'success' %}
+                            <div class="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100">
+                                <div class="flex flex-col md:flex-row justify-between gap-6">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <h4 class="text-xl font-black text-gray-800">{{ b.yoga_class.name }}</h4>
+                                            <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase italic">Đang tham gia</span>
+                                        </div>
+                                        <p class="text-sm text-gray-400 mb-4 italic">
+                                            <i class="fas fa-map-marker-alt mr-1 text-emerald-500/50"></i> {{ b.yoga_class.branch.name }}
+                                        </p>
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            {% for s in b.yoga_class.schedules.all %}
+                                            <div class="flex justify-between items-center bg-[#f8fafc] p-3 rounded-2xl border border-gray-50">
+                                                <span class="text-xs font-bold text-gray-500 uppercase">{{ s.get_day_of_week_display }}</span>
+                                                <span class="text-sm font-black text-gray-800">{{ s.start_time|time:"H:i" }} - {{ s.end_time|time:"H:i" }}</span>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="md:w-32 flex flex-col justify-center items-end md:items-center border-t md:border-t-0 md:border-l border-gray-50 pt-4 md:pt-0 md:pl-6">
+                                        <span class="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">Ngày bắt đầu</span>
+                                        <p class="text-lg font-black text-emerald-600">{{ b.booking_date|date:"d/m/Y" }}</p>
                                     </div>
                                 </div>
-                                <div class="text-right">
-                                    <div class="font-black text-emerald-600 text-xl">{{ b.yoga_class.price }}đ</div>
-                                    <span class="inline-block mt-2 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider
-                                        {% if b.status == 'pending' %} bg-orange-50 text-orange-500 
-                                        {% elif b.status == 'cancelled' %} bg-red-50 text-red-400
-                                        {% else %} bg-emerald-50 text-emerald-600 {% endif %}">
-                                        {{ b.get_status_display }}
-                                    </span>
-                                </div>
-                            </div>
-                            {% if b.status == 'pending' %}
-                            <div class="mt-4 pt-4 border-t border-gray-50 text-right">
-                                <a href="{% url 'cancel_booking' b.id %}" 
-                                   onclick="return confirm('Bằng chắc chắn muốn hủy đơn đăng ký này không?')"
-                                   class="text-xs font-bold text-red-400 hover:text-red-600 transition-colors py-2 px-4 hover:bg-red-50 rounded-lg">
-                                   <i class="fas fa-times mr-1"></i> Hủy đăng ký
-                                </a>
                             </div>
                             {% endif %}
-                        </div>
-                        {% empty %}
-                        <div class="text-center py-20">
-                            <img src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png" class="w-20 mx-auto opacity-20 mb-4">
-                            <p class="text-gray-400 font-medium">Bằng chưa đăng ký khóa học nào đâu.</p>
-                            <a href="/register.html/" class="mt-4 inline-block text-emerald-600 font-bold hover:underline">Xem lịch học ngay &rarr;</a>
-                        </div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div x-show="openModal" 
-         x-cloak
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
-         class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl" @click.away="openModal = false">
-            <div class="text-center mb-6">
-                <h3 class="text-2xl font-black text-gray-800 italic uppercase">SoraYoga</h3>
-                <p class="text-gray-400 text-sm font-medium mt-1">Cập nhật thông tin cá nhân</p>
+</div>
+
+<div x-show="openModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl" @click.away="openModal = false">
+        <h3 class="text-2xl font-black text-center text-gray-800 mb-6 uppercase">Cập nhật hồ sơ</h3>
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
+            <input type="hidden" name="update_profile" value="1">
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-widest">Họ và tên</label>
+                <input type="text" name="first_name" value="{{ user.first_name }}" class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500">
             </div>
-            <form method="POST" class="space-y-5">
-                {% csrf_token %}
-                <input type="hidden" name="update_profile" value="1">
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 ml-1 tracking-widest">Họ và tên</label>
-                    <input type="text" name="first_name" value="{{ user.first_name }}" 
-                           class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-700">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 ml-1 tracking-widest">Số điện thoại</label>
-                    <input type="text" name="phone" value="{{ profile.phone_number|default:'' }}" 
-                           placeholder="09xx xxx xxx"
-                           class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-700">
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="button" @click="openModal = false" 
-                            class="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all active:scale-95 text-sm">
-                        Hủy
-                    </button>
-                    <button type="submit" 
-                            class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all active:scale-95 text-sm">
-                        Lưu lại
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-widest">Số điện thoại</label>
+                <input type="text" name="phone" value="{{ profile.phone_number|default:'' }}" class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" @click="openModal = false" class="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold">Hủy</button>
+                <button type="submit" class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-200">Lưu</button>
+            </div>
+        </form>
     </div>
 </div>
+
 {% endblock %}

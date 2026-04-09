@@ -16,7 +16,16 @@
 {% block scripts %}
     <script type="text/babel" src="{% static 'components/Header.js' %}"></script>
     <script type="text/babel" src="{% static 'components/BlogContent.js' %}"></script>
-    <script type="text/babel" src="{% static 'components/blogData.js' %}"></script>
-    <script type="text/babel" src="{% static 'components/Footer.js' %}"></script>
+    <script>
+        // Nhận dữ liệu từ Django và gán vào biến global cho React dùng
+        window.blogPosts = {{ posts_json|safe }};
+        
+        window.siteConfig = {
+            logoUrl: "{% static 'images/logo.png' %}",
+            homeUrl: "{% url 'home' %}",
+            currentUser: "{{ request.user.username|default:'' }}"
+        };
+    </script>    
+<script type="text/babel" src="{% static 'components/Footer.js' %}"></script>
     <script type="text/babel" src="{% static 'js/blog-app.js' %}"></script>
 {% endblock %}

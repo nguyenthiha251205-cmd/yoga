@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="icon" href="data:,">
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel" src="{% static 'components/Header.js' %}"></script>
+<script type="text/babel" src="{% static 'components/Footer.js' %}"></script>
+
+<style>
+    .main-wrapper { min-height: 100vh; display: flex; flex-direction: column; }
+    .content-area { flex-grow: 1; }
+    .btn-directions {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background-color: #f0fdf4;
+        color: #16a34a;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .btn-directions:hover {
+        background-color: #dcfce7;
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
+{% block title %}Chi nhánh {{ branch.name }} - SoraYoga{% endblock %}
+
+{% block content %}
+{% csrf_token %} <div class="main-wrapper">
+    <div id="header-root"></div>
+    <div class="content-area pt-10 md:pt-14"></div>
+    <div class="content-area">
+        <div class="max-w-8xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <aside class="lg:col-span-3 space-y-6">
+                    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-newspaper text-emerald-500 mr-2"></i> Kiến thức Yoga
+                        </h3>
+                        <div class="space-y-4">
+                            {% for post in random_posts %}
+                            <a href="{% url 'post' post.slug %}" class="group block">
+                                <div class="flex gap-3">
+                                    {% if post.image %}
+                                    <img src="{{ post.image.url }}" class="w-16 h-16 rounded-xl object-cover shadow-sm group-hover:opacity-80 transition">
+                                    {% endif %}
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-emerald-600">{{ post.title }}</h4>
+                                        <p class="text-[10px] text-gray-400 mt-1">{{ post.created_at|date:"d/m/Y" }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'blog' %}" class="block text-center mt-6 text-xs font-bold text-emerald-600 hover:underline">Xem tất cả bài viết</a>
+                    </div>
+                </aside>
+
+                <main class="lg:col-span-6 space-y-8">
+                    {% if branch.image %}
+                        <img src="{{ branch.image.url }}" class="w-full h-[400px] object-cover rounded-3xl shadow-xl">
+                    {% else %}
+                        <div class="w-full h-80 bg-gray-200 rounded-3xl flex items-center justify-center shadow-inner italic text-gray-400">Chưa có hình ảnh</div>
+                    {% endif %}
+
+                    <div class="bg-white rounded-3xl p-8 border border-gray-50 shadow-sm">
+                        <div class="flex justify-between items-start mb-4">
+                            <h1 class="text-3xl font-bold text-gray-900">{{ branch.name }}</h1>
+                            <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">Đang hoạt động</span>
+                        </div>
+                        <p class="text-gray-600 mb-4 flex items-center"><i class="fas fa-map-marker-alt text-emerald-500 mr-2"></i> {{ branch.address }}</p>
+                        
+                        <div class="mb-6">
+                            <a href="{% url 'map' %}?branch_id={{ branch.id }}" class="btn-directions">
+                                <i class="fas fa-map-marked-alt mr-2"></i> Xem vị trí trên bản đồ
+                            </a>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 py-6 border-y border-gray-100">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600"><i class="far fa-clock"></i></div>
+                                <div>
+                                    <p class="text-[10px] uppercase text-gray-400 font-bold">Giờ mở cửa</p>
+                                    <p class="text-sm font-semibold">{{ branch.opening_hours }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><i class="fas fa-phone-alt"></i></div>
+                                <div>
+                                    <p class="text-[10px] uppercase text-gray-400 font-bold">Hotline</p>
+                                    <p class="text-sm font-semibold">{{ branch.phone }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-8 rounded-3xl border border-gray-100">
+                        <h2 class="text-2xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-star text-yellow-400 mr-2"></i> Đánh giá từ học viên
+                        </h2>
+                        
+                        {% if user.is_authenticated %}
+                        <form id="reviewForm" class="mb-8 bg-white p-6 rounded-2xl shadow-md border border-emerald-100">
+                            <div class="flex items-center gap-4 mb-4">
+                                <label class="font-bold text-gray-700">Đánh giá của bạn:</label>
+                                <div class="flex flex-row-reverse gap-1">
+                                    {% for i in "54321"|make_list %}
+                                    <input type="radio" name="rating" id="star{{i}}" value="{{i}}" class="hidden peer" {% if forloop.first %}checked{% endif %}>
+                                    <label for="star{{i}}" class="cursor-pointer text-2xl text-gray-300 peer-checked:text-yellow-400 hover:text-yellow-300">★</label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <textarea id="comment" class="w-full p-4 bg-gray-50 border-none rounded-xl mb-4 focus:ring-2 focus:ring-emerald-500 transition" rows="3" placeholder="Bạn có thể sửa lại đánh giá cũ tại đây..."></textarea>
+                            <button type="submit" class="bg-emerald-600 text-white px-8 py-2.5 rounded-full font-bold hover:bg-emerald-700 transition">Cập nhật đánh giá</button>
+                        </form>
+                        {% endif %}
+
+                        <div id="reviewsList" class="space-y-4">
+                            {% for r in reviews %}
+                            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-50">
+                                <div class="flex justify-between mb-2">
+                                    <p class="font-bold text-gray-800">{{ r.user.username }}</p>
+                                    <span class="text-yellow-400 font-bold text-sm">★ {{ r.rating }}</span>
+                                </div>
+                                <p class="text-gray-600 text-sm italic">"{{ r.comment }}"</p>
+                            </div>
+                            {% empty %}
+                            <p class="text-center text-gray-400 py-10">Hãy là người đầu tiên đánh giá.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </main>
+
+                <aside class="lg:col-span-3 space-y-6">
+                    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                        <h3 class="font-bold text-gray-800 mb-4">Các chi nhánh khác</h3>
+                        <div class="space-y-4">
+                            {% for other in other_branches %}
+                            <div class="block group border-b border-gray-50 pb-4 last:border-0">
+                                <a href="{% url 'branch_detail' other.id %}" class="block">
+                                    <div class="relative overflow-hidden rounded-xl mb-2">
+                                        {% if other.image %}
+                                        <img src="{{ other.image.url }}" class="w-full h-32 object-cover group-hover:scale-110 transition duration-500">
+                                        {% endif %}
+                                    </div>
+                                    <h4 class="font-bold text-gray-800 text-sm group-hover:text-emerald-600">{{ other.name }}</h4>
+                                    <p class="text-[11px] text-gray-500 truncate mb-2"><i class="fas fa-map-marker-alt mr-1"></i> {{ other.address }}</p>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-root"></div>
+</div>
+
+<script type="text/babel">
+    const { createRoot } = ReactDOM;
+
+    // 1. Hàm lấy CSRF Token từ Cookie (SỬA LỖI 403)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // 2. Xử lý gửi Review (SỬA LỖI 403 & LỖI JSON)
+    const reviewForm = document.getElementById('reviewForm');
+    if (reviewForm) {
+        reviewForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const rating = document.querySelector('input[name="rating"]:checked').value;
+            const comment = document.getElementById('comment').value;
+
+            try {
+                const response = await fetch('{% url "submit_review" %}', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // Thêm token vào đây
+                    },
+                    body: JSON.stringify({
+                        branch_id: parseInt("{{ branch.id }}"), // Đảm bảo truyền vào là ID số
+                        rating: parseInt(rating),               // Đảm bảo rating là số
+                        comment: comment.trim()
+                    })
+                });
+
+                const result = await response.json();
+                if (response.ok && result.status === 'success') {
+                    alert(result.message);
+                    location.reload();
+                } else {
+                    alert("Lỗi: " + (result.message || "Không thể gửi đánh giá"));
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                alert("Đã xảy ra lỗi kết nối.");
+            }
+        };
+    }
+
+    // 3. Render React Components (SỬA LỖI RE-RENDER ROOT)
+    const renderReact = (id, Component) => {
+        const el = document.getElementById(id);
+        if (el && !el._reactRoot) {
+            const root = createRoot(el);
+            el._reactRoot = root;
+            root.render(<Component />);
+        }
+    };
+
+    renderReact('header-root', Header);
+    renderReact('footer-root', Footer);
+</script>
+{% endblock %}

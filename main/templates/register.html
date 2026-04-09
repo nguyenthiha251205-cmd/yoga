@@ -2,6 +2,7 @@
 {% load static %}
 {% block title %}Đăng Ký Thành Viên | SoraYoga Hóc Môn{% endblock %}
 {% block extra_head %}
+<link rel="icon" href="data:,">
     <script>
         window.siteConfig = {
             logoUrl: "{% static 'images/logo.png' %}",
@@ -29,19 +30,20 @@
 {% endblock %}
 {% block scripts %}
     <script>
-        window.dbClasses = [
-        {% for c in classes %}
-        {
-            id: "{{ c.id }}",
-            name: "{{ c.name|escapejs }}", // Lấy trường name của model
-            branch: "{{ c.branch.name|escapejs }}", // Lấy trường name của model Branch
-            slug: "{{ c.slug|default:'' }}",
-            price: "{{ c.price }}"
-        },
-        {% endfor %}
-    ];
+        // Lấy dữ liệu đã bao gồm mảng 'times' từ database (view gửi xuống)
+        const rawData = {{ class_list_json|safe }};
+        
+        // Gán vào window.dbClasses để React-app sử dụng
+        window.dbClasses = rawData.map(c => ({
+            id: c.id.toString(),
+            name: c.name,
+            branch: c.branch,
+            slug: c.slug,
+            price: c.price,
+            // Quan trọng: lấy mảng times từ database
+            times: c.times.length > 0 ? c.times : ["Liên hệ để biết lịch học"]
+        }));
     </script>
-    <script src="{% static 'components/classData.js' %}"></script>
     <script type="text/babel" src="{% static 'components/Header.js' %}"></script>
     <script type="text/babel" src="{% static 'components/Footer.js' %}"></script>
     <script type="text/babel" src="{% static 'js/register-app.js' %}"></script>

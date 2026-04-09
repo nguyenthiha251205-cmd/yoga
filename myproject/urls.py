@@ -5,6 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 urlpatterns = [
     # 🔐 XÁC THỰC (Login/Logout/Register)
+    path('api/branches/', views.get_branches_api, name='get_branches_api'),
     path('api/login/', views.login_custom, name='login_custom_api'),
     path('api/register-account/', views.register_account_api, name='register_account_api'),
     path('api/teachers/', views.get_teachers_api, name='get_teachers_api'),
@@ -55,6 +56,9 @@ urlpatterns = [
     path('post.html/<slug:slug>/', views.post_view, name='post'),
     # 🗺️ GIS & MAP (Dành cho khách tìm chi nhánh)
     path('map/', views.map_view, name='map'),
+    path('branch/<int:branch_id>/', views.branch_detail, name='branch_detail'),
+    path('api/branch/<int:branch_id>/reviews/', views.get_branch_reviews, name='get_branch_reviews'),
+    path('submit-review/', views.submit_review, name='submit_review'),
 ]
 # ✅ Cấu hình Static và Media (Chuẩn chỉnh cho môi trường Development)
 if settings.DEBUG:

@@ -1,9 +1,11 @@
+import logging
 import json
 import datetime
+from urllib import request
 from django.shortcuts import render, get_object_or_404, redirect
 
 from myproject.settings import BASE_DIR
-from .models import BlogPost, Branch, YogaClass, ClassSchedule, Booking, ContactMessage, Profile, Teacher
+from .models import BlogPost, Branch, BranchReview, YogaClass, ClassSchedule, Booking, ContactMessage, Profile, Teacher
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
@@ -13,6 +15,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 # --- KIỂM TRA QUYỀN (Chỉ còn Admin là quyền cao nhất) ---
 def is_admin(user):
@@ -277,43 +280,84 @@ def admin_branches(request):
         name = request.POST.get('name')
         address = request.POST.get('address')
         phone = request.POST.get('phone')
+        # --- BỔ SUNG LẤY DỮ LIỆU MỚI ---
+        opening_hours = request.POST.get('opening_hours', '08:00 - 21:00')
+        is_active = request.POST.get('is_active') == 'on' # Checkbox gửi 'on' nếu được tích
+        
         try:
             lat = float(request.POST.get('lat'))
             lng = float(request.POST.get('lng'))
             location = Point(lng, lat, srid=4326)
-            Branch.objects.create(name=name, address=address, phone=phone, location=location)
+            
+            # --- CẬP NHẬT KHI CREATE ---
+            Branch.objects.create(
+                name=name, 
+                address=address, 
+                phone=phone, 
+                location=location,
+                opening_hours=opening_hours,
+                is_active=is_active
+            )
             messages.success(request, "Thêm chi nhánh thành công!")
         except Exception as e:
-            messages.error(request, f"Lỗi tọa độ: {e}")
+            messages.error(request, f"Lỗi: {e}")
         return redirect('admin_branches')
+
+    # --- CẬP NHẬT PHẦN JSON TRẢ VỀ (Để JS hiển thị được dữ liệu cũ) ---
     branches = Branch.objects.all()
     branches_list = []
     for b in branches:
         branches_list.append({
-            'id': b.id, 'name': b.name, 'address': b.address, 'phone': b.phone or '',
-            'lat': b.location.y, 'lng': b.location.x
+            'id': b.id, 
+            'name': b.name, 
+            'address': b.address, 
+            'phone': b.phone or '',
+            'lat': b.location.y, 
+            'lng': b.location.x,
+            'opening_hours': getattr(b, 'opening_hours', ''), # Lấy thêm
+            'is_active': b.is_active                        # Lấy thêm
         })
     return render(request, 'admin_custom/admin_branch_list.html', {
         'branches': branches,
         'branches_json': json.dumps(branches_list)
     })
 @user_passes_test(is_admin, login_url='/')
-def edit_branch(request, branch_id):
+@login_required
+@csrf_exempt
+def edit_branch(request, branch_id=None):
     if request.method == 'POST':
-        branch = get_object_or_404(Branch, id=branch_id)
-        try:
-            lat = float(request.POST.get('lat'))
-            lng = float(request.POST.get('lng'))
-            branch.name = request.POST.get('name')
-            branch.address = request.POST.get('address')
-            branch.phone = request.POST.get('phone')
-            branch.location = Point(lng, lat, srid=4326)
-            branch.save()
-            messages.success(request, f"Đã cập nhật chi nhánh: {branch.name}")
-        except Exception as e:
-            messages.error(request, f"Lỗi cập nhật: {e}")
-    return redirect('admin_branches')
-@user_passes_test(is_admin, login_url='/')
+        # Lấy dữ liệu từ request.POST (do dùng FormData)
+        name = request.POST.get('name')
+        address = request.POST.get('address')
+        phone = request.POST.get('phone')
+        opening_hours = request.POST.get('opening_hours')
+        coordinates = request.POST.get('coordinates')
+        image = request.FILES.get('image') # Lấy file ảnh
+
+        if branch_id:
+            branch = get_object_or_404(Branch, id=branch_id)
+        else:
+            branch = Branch()
+
+        branch.name = name
+        branch.address = address
+        branch.phone = phone
+        branch.opening_hours = opening_hours
+
+        if image:
+            branch.image = image # Lưu ảnh mới vào database
+
+        if coordinates:
+            try:
+                lng, lat = coordinates.split(',')
+                branch.location = Point(float(lng), float(lat))
+            except:
+                pass
+
+        branch.save()
+        return JsonResponse({'status': 'success'})
+
+    # Phần GET bên dưới giữ nguyên...@user_passes_test(is_admin, login_url='/')
 def delete_branch(request, branch_id):
     branch = get_object_or_404(Branch, id=branch_id)
     name = branch.name
@@ -547,9 +591,29 @@ def class_detail_view(request):
     # Tìm lớp học bằng ID (Trường ID luôn có sẵn trong Model của bạn)
     yoga_class = get_object_or_404(YogaClass, id=class_id)
     return render(request, 'class-detail.html', {'class_obj': yoga_class})
+
 def blog_view(request):
-    posts = BlogPost.objects.all().order_by('-id')
-    return render(request, 'blog.html', {'posts': posts})
+    # Sử dụng 'date_published' thay vì 'created_at' hoặc 'is_published'
+    # vì đây là trường chắc chắn có trong DB của bạn
+    posts = BlogPost.objects.all().order_by('-date_published')
+    
+    posts_data = []
+    for post in posts:
+        posts_data.append({
+            'id': post.id,
+            'slug': post.slug,
+            'title': post.title,
+            # Kiểm tra nếu có ảnh thì lấy url, không thì để trống
+            'image': post.image.url if post.image else '',
+            'excerpt': post.summary,
+            # Sử dụng date_published
+            'publishDate': post.date_published.strftime("%d/%m/%Y") if post.date_published else ""
+        })
+    
+    return render(request, 'blog.html', {
+        'posts_json': json.dumps(posts_data)
+    })
+
 def post_view(request, slug):
     post = get_object_or_404(BlogPost, slug=slug)
     return render(request, 'post.html', {'post': post})
@@ -570,51 +634,212 @@ def contact_view(request):
         return redirect('contact') 
     # Trả về giao diện kèm biến branches_json cho Leaflet
     return render(request, 'contact.html', {'branches_json': branches_json})
+import json # Đảm bảo đã import json ở đầu file
+
 def register_view(request):
     if request.method == 'POST':
-        # Trường hợp 1: Nhận dữ liệu từ React (JSON)
-        if request.content_type == 'application/json':
-            data = json.loads(request.body)
-            name = data.get('fullName')
-            phone = data.get('phone')
-            class_id = data.get('class_id')
-        # Trường hợp 2: Nhận từ Form HTML bình thường (Nếu có)
-        else:
-            name = request.POST.get('fullName')
-            phone = request.POST.get('phone')
-            class_id = request.POST.get('class_id')
-        # Kiểm tra và lưu vào DB
-        if name and phone and class_id:
+        try:
+            # 1. Lấy dữ liệu thô
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+                name = data.get('fullName')
+                phone = data.get('phone')
+                class_id = data.get('class_id')
+                session_raw = data.get('session', []) 
+            else:
+                name = request.POST.get('fullName')
+                phone = request.POST.get('phone')
+                class_id = request.POST.get('class_id')
+                session_raw = request.POST.getlist('session')
+
+            # 2. Chuyển mảng thành chuỗi để lưu DB
+            if isinstance(session_raw, list):
+                session_info = ", ".join(session_raw)
+            else:
+                session_info = str(session_raw)
+
+            # 3. Kiểm tra điều kiện bắt buộc
+            if not name or not phone or not class_id:
+                return JsonResponse({'status': 'error', 'message': 'Vui lòng điền đầy đủ thông tin!'}, status=400)
+
+            # 4. Truy vấn lớp học
             if str(class_id).isdigit():
                 yoga_class = get_object_or_404(YogaClass, id=class_id)
             else:
                 yoga_class = get_object_or_404(YogaClass, slug=class_id)
+            
+            # 5. Lưu vào Database
             Booking.objects.create(
                 full_name=name, 
                 phone=phone, 
                 yoga_class=yoga_class,
+                session=session_info,
                 user=request.user if request.user.is_authenticated else None
             )
-            # Nếu gửi bằng React, trả về JSON thành công
+
+            # 6. Trả về phản hồi thành công
             if request.content_type == 'application/json':
                 return JsonResponse({'status': 'success', 'message': 'Đăng ký thành công!'})
+            
             messages.success(request, "Gửi yêu cầu tư vấn thành công!")
             return redirect('registration_info')
-    classes = YogaClass.objects.all()
-    return render(request, 'register.html', {'classes': classes})
+
+        except Exception as e:
+            # Ghi lỗi ra Terminal để bạn debug
+            print(f"--- LỖI ĐĂNG KÝ: {str(e)} ---")
+            return JsonResponse({'status': 'error', 'message': 'Có lỗi xảy ra hệ thống.'}, status=500)
+    
+    # --- PHẦN GET (GIỮ NGUYÊN CODE CỦA BẠN) ---
+    classes_query = YogaClass.objects.all().prefetch_related('schedules')
+    class_list_data = []
+    for c in classes_query:
+        schedules = [
+            f"{s.get_day_of_week_display()}: {s.start_time.strftime('%H:%M')} - {s.end_time.strftime('%H:%M')}"
+            for s in c.schedules.all()
+        ]
+        class_list_data.append({
+            'id': str(c.id),
+            'name': c.name,
+            'branch': c.branch.name if c.branch else "Vãng lai",
+            'slug': getattr(c, 'slug', ''),
+            'price': str(c.price),
+            'times': schedules
+        })
+
+    context = {
+        'classes': classes_query,
+        'class_list_json': json.dumps(class_list_data)
+    }
+    return render(request, 'register.html', context)
 def registration_info_view(request):
     return render(request, 'registration-info.html')
+
 def map_view(request):
     branches = Branch.objects.all()
-    data = [{
-        "name": b.name, "address": b.address, "phone": b.phone or "Đang cập nhật",
-        "lat": b.location.y, "lng": b.location.x
-    } for b in branches]
+    data = []
+    for b in branches:
+        # Kiểm tra xem chi nhánh có tọa độ location không để tránh lỗi
+        lat = b.location.y if b.location else 0
+        lng = b.location.x if b.location else 0
+        data.append({
+            "name": b.name, 
+            "address": b.address, 
+            "phone": b.phone or "Đang cập nhật",
+            "lat": lat, 
+            "lng": lng
+        })
     return render(request, "map.html", {"branches_json": json.dumps(data)})
-# settings.py
 
-STATIC_URL = 'static/'
+# views.py
+from django.db.models import Avg, Count
 
+def get_branches_api(request):
+    # Lấy danh sách chi nhánh kèm số lượng review và điểm trung bình
+    branches = Branch.objects.filter(is_active=True).annotate(
+        real_review_count=Count('reviews'), # 'reviews' là related_name trong model BranchReview
+        avg_rating=Avg('reviews__rating')
+    )
+    
+    data = []
+    for b in branches:
+        data.append({
+            'id': b.id,
+            'name': b.name,
+            'address': b.address,
+            'image': b.image.url if b.image else None,
+            # Sử dụng giá trị đã tính toán, nếu không có thì để mặc định
+            'review_count': b.real_review_count, 
+            'average_rating': float(b.avg_rating) if b.avg_rating else 5.0,
+            'isOpen': True, # Bạn có thể viết logic kiểm tra giờ thực tế ở đây
+        })
+    return JsonResponse(data, safe=False)
+
+def branch_detail(request, branch_id):
+    branch = get_object_or_404(Branch, id=branch_id)
+    
+    # 1. Lấy các đánh giá của chi nhánh này
+    reviews = BranchReview.objects.filter(branch=branch).order_by('-created_at')
+    
+    # 2. Lấy 5 bài blog ngẫu nhiên cho mục "Kiến thức Yoga"
+    random_posts = BlogPost.objects.order_by('?')[:5]
+    
+    # 3. Lấy các chi nhánh khác (loại trừ chi nhánh hiện tại)
+    other_branches = Branch.objects.exclude(id=branch_id)[:3]
+    
+    return render(request, 'branch_detail.html', {
+        'branch': branch,
+        'reviews': reviews,
+        'random_posts': random_posts,   # Bổ sung
+        'other_branches': other_branches # Bổ sung
+    })
+
+def get_branch_reviews(request, branch_id):
+    reviews = BranchReview.objects.filter(branch_id=branch_id).values(
+        'user__username', 'rating', 'comment', 'created_at'
+    )
+    return JsonResponse(list(reviews), safe=False)
+
+# 2. Xử lý gửi/sửa đánh giá tại trang chi tiết
+@login_required
+def submit_review(request):
+    if request.method == 'POST':
+        try:
+            # Kiểm tra xem có dữ liệu body không
+            if not request.body:
+                return JsonResponse({'status': 'error', 'message': 'No data provided'}, status=400)
+            
+            data = json.loads(request.body)
+            branch_id = data.get('branch_id')
+            
+            # Ép kiểu rating an toàn
+            try:
+                rating = int(data.get('rating', 5))
+            except (ValueError, TypeError):
+                rating = 5
+                
+            comment = data.get('comment', '')
+
+            if not branch_id:
+                return JsonResponse({'status': 'error', 'message': 'Thiếu ID chi nhánh'}, status=400)
+
+            branch = get_object_or_404(Branch, id=branch_id)
+
+            # Sử dụng update_or_create để tránh trùng lặp
+            review, created = BranchReview.objects.update_or_create(
+                branch=branch, 
+                user=request.user,
+                defaults={
+                    'rating': rating, 
+                    'comment': comment
+                }
+            )
+
+            return JsonResponse({
+                'status': 'success', 
+                'message': 'Cập nhật thành công!' if not created else 'Cảm ơn bạn đã đánh giá!'
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Dữ liệu JSON không hợp lệ'}, status=400)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)        
+@login_required
+def save_branch_review(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        branch_id = data.get('branch_id')
+        rating = data.get('rating')
+        comment = data.get('comment')
+        
+        branch = get_object_or_404(Branch, id=branch_id)
+        
+        review, created = BranchReview.objects.update_or_create(
+            branch=branch, user=request.user,
+            defaults={'rating': rating, 'comment': comment}
+        )
+        return JsonResponse({'status': 'success', 'message': 'Đã lưu đánh giá'})
 # Dòng này báo cho Django biết nơi tìm các file JS, CSS, Hình ảnh của bạn
 STATICFILES_DIRS = [
     BASE_DIR / "static", 

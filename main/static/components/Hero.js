@@ -1,4 +1,4 @@
-// Thêm props: onShowMore (hàm hiện nội dung) và isContentVisible (trạng thái ẩn/hiện)
+// Hero.js
 function Hero({ onShowMore, isContentVisible }) {
   // Hàm xử lý khi click mũi tên
   const handleArrowClick = () => {
@@ -31,19 +31,38 @@ function Hero({ onShowMore, isContentVisible }) {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <a href="/schedule.html" className="inline-block bg-[var(--primary-color)] text-white text-lg font-bold px-8 py-4 rounded-full hover:shadow-xl hover:brightness-110 transition-all duration-300 transform hover:scale-105 shadow-emerald-100 shadow-lg">
+                <a href="/schedule.html" className="inline-block bg-[var(--primary-color)] text-white text-lg font-bold px-8 py-4 rounded-full hover:shadow-xl hover:brightness-110 transition-all duration-300 transform hover:scale-105 shadow-emerald-100 shadow-lg text-center">
                   Xem Lịch Học Ngay
                 </a>
               </div>
 
-              {/* Chỉ số thống kê */}
-              <div className="mt-12 flex items-center justify-center md:justify-start gap-6 md:gap-10">
-                {[ ['200+', 'Học viên'], ['10+', 'Giáo viên'], ['15+', 'Lớp/tuần'] ].map(([val, label], i) => (
-                  <div key={i} className="text-center border-l-2 border-emerald-100 pl-4">
-                    <div className="text-2xl md:text-3xl font-black text-emerald-600">{val}</div>
-                    <div className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest">{label}</div>
-                  </div>
-                ))}
+              {/* --- 2 NÚT ĐIỀU HƯỚNG MỚI --- */}
+              <div className="mt-12 flex flex-wrap items-center justify-center md:justify-start gap-4">
+                <button 
+                  onClick={() => {
+                    if (!isContentVisible && onShowMore) onShowMore();
+                    setTimeout(() => {
+                      document.getElementById('teachers')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  }}
+                  className="px-6 py-3.5 bg-emerald-600 text-white rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 active:scale-95 group"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:rotate-12 transition-transform"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  Đội ngũ HLV
+                </button>
+                
+                <button 
+                  onClick={() => {
+                    if (!isContentVisible && onShowMore) onShowMore();
+                    setTimeout(() => {
+                      document.getElementById('branches')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  }}
+                  className="px-6 py-3.5 bg-white text-emerald-700 border-2 border-emerald-100 rounded-2xl font-bold text-sm flex items-center gap-2 hover:border-emerald-600 hover:bg-emerald-50 transition-all active:scale-95 group"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:bounce transition-transform"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Chi nhánh nổi bật
+                </button>
               </div>
             </div>
 
@@ -54,10 +73,11 @@ function Hero({ onShowMore, isContentVisible }) {
                 alt="Yoga Practice"
                 className="relative rounded-3xl shadow-2xl w-full transform transition duration-500 group-hover:scale-[1.02]" />
             </div>
+
           </div>
         </div>
 
-        {/* --- NÚT MŨI TÊN ĐÔI: Ẩn đi khi nội dung đã hiện --- */}
+        {/* --- NÚT MŨI TÊN ĐÔI --- */}
         {!isContentVisible && (
           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 hidden md:block">
             <button 
