@@ -1,23 +1,12 @@
-# Môi trường ảo (Ngăn lỗi "No Python at..." khi máy khác tải về)
 .venv/
 venv/
 env/
 ENV/
-
-# File rác Python sinh ra khi chạy code
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Database SQLite cũ (Chúng ta đã chuyển sang dùng PostGIS/PostgreSQL)
 db.sqlite3
-
-# File thư viện nặng (GDAL .whl) không nên đưa lên GitHub
 *.whl
-
-# Thư mục chứa ảnh/file người dùng upload lên web
 media/
-
-# File cấu hình bí mật (Chứa mật khẩu Database, Secret Key)
 .env
