@@ -1,10 +1,10 @@
 {% extends 'admin_custom/base_admin.html' %}
 {% block admin_content %}
-<div class="bg-white rounded-xl shadow-sm border border-gray-100">
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 animate-fade-in">
     <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-        <h2 class="text-xl font-bold text-gray-800">Hòm thư khách hàng</h2>
-        <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold">
-            Tổng: {{ messages_list.count }} tin nhắn
+        <h2 class="text-xl font-bold bg-gradient-to-r from-[var(--text-dark)] via-[var(--primary-color)] to-[var(--primary-light)] bg-clip-text text-transparent">Hòm thư khách hàng</h2>
+        <span class="bg-gradient-to-r from-[var(--primary-color)] to-[var(--primary-light)] text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+            Tổng: {{ messages_list.count }} khách hàng
         </span>
     </div>
     <div class="overflow-x-auto">
@@ -18,11 +18,18 @@
                     <th class="px-6 py-4 text-center">Hành động</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100 text-sm">
+            <tbody class="divide-y divide-gray-100 text-sm stagger-animation">
                 {% for msg in messages_list %}
-                <tr class="hover:bg-gray-50 transition-colors">
+                <tr class="hover:bg-[var(--secondary-color)] transition-all duration-300 group">
                     <td class="px-6 py-4">
-                        <div class="font-semibold text-gray-900">{{ msg.full_name }}</div>
+                        <div class="flex items-center gap-2">
+                            <div class="font-semibold text-gray-900">{{ msg.full_name }}</div>
+                            {% if msg.message_count > 1 %}
+                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                                    {{ msg.message_count }} tin
+                                </span>
+                            {% endif %}
+                        </div>
                         <div class="text-xs text-gray-500">{{ msg.email }}</div>
                     </td>
                     <td class="px-6 py-4">
@@ -45,6 +52,13 @@
                     <td class="px-6 py-4 text-gray-500">{{ msg.created_at|date:"H:i - d/m/Y" }}</td>
                     <td class="px-6 py-4 text-center">
                         <div class="flex justify-center gap-3">
+                            {% if msg.message_count > 1 %}
+                                <a href="{% url 'admin_contact_history' msg.email %}" 
+                                   class="text-blue-500 hover:text-blue-700 transition-colors" 
+                                   title="Xem lịch sử ({{ msg.message_count }} tin nhắn)">
+                                    <i data-lucide="history" class="w-5 h-5"></i>
+                                </a>
+                            {% endif %}
                             <button onclick="openReplyModal(
                                 '{{ msg.id }}', 
                                 '{{ msg.email }}', 

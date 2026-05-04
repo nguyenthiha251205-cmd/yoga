@@ -14,18 +14,16 @@
     }
 </style>
 {% endblock %}
-
 {% block admin_content %}
-<div class="flex justify-between items-center mb-6">
+<div class="flex justify-between items-center mb-6 animate-fade-in">
     <div>
-        <h1 class="text-2xl font-bold text-gray-800">Quản lý Hệ thống Chi nhánh</h1>
-        <p class="text-sm text-gray-500">Click trên bản đồ để thêm hoặc chọn nút sửa để cập nhật</p>
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-[var(--text-dark)] via-[var(--primary-color)] to-[var(--primary-light)] bg-clip-text text-transparent">Quản lý Hệ thống Chi nhánh</h1>
+        <p class="text-sm text-[var(--text-light)]">Click trên bản đồ để thêm hoặc chọn nút sửa để cập nhật</p>
     </div>
-    <button onclick="openAddModalManual()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition flex items-center shadow-sm">
+    <button onclick="openAddModalManual()" class="bg-gradient-to-r from-[var(--primary-color)] to-[var(--primary-light)] text-white px-4 py-2 rounded-lg hover:from-[var(--primary-dark)] hover:to-[var(--primary-color)] transition-all flex items-center shadow-sm font-bold transform hover:scale-105">
         <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Thêm chi nhánh
     </button>
 </div>
-
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
         <div class="p-4 border-b bg-gray-50 flex flex-col space-y-3">
@@ -47,9 +45,9 @@
                         <th class="p-4 text-xs font-bold text-gray-500 uppercase text-right">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-100 stagger-animation">
                     {% for b in branches %}
-                    <tr id="row-{{ b.id }}" class="hover:bg-gray-50 transition-colors cursor-pointer" 
+                    <tr id="row-{{ b.id }}" class="hover:bg-[var(--secondary-color)] transition-all duration-300 cursor-pointer group" 
                         onclick="focusBranch({{ b.location.y|stringformat:'f' }}, {{ b.location.x|stringformat:'f' }}, 'row-{{ b.id }}')">
                         <td class="p-4">
                             <p class="font-bold text-gray-800">{{ b.name }}</p>
@@ -88,7 +86,6 @@
         <div id="branch-map"></div>
     </div>
 </div>
-
 <div id="addBranchModal" class="fixed inset-0 z-[9999] hidden flex items-center justify-center p-4 bg-black/50">
     <div id="modal-content" class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 relative">
         <div id="modal-header" class="p-4 border-b bg-gray-50 flex justify-between items-center">
@@ -98,18 +95,15 @@
             </div>
             <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        
         <form id="branch-form" enctype="multipart/form-data" class="p-6">
             {% csrf_token %}
             <input type="hidden" id="branch-id">
-            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tên chi nhánh</label>
                         <input type="text" id="form-name" required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
                     </div>
-
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Điện thoại</label>
@@ -117,21 +111,28 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Giờ mở cửa</label>
-                            <input type="text" id="form-hours" placeholder="08:00 - 21:00" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <div class="flex flex-col gap-3"> 
+                                <div class="relative">
+                                    <input type="time" id="form-hours-start" required 
+                                        class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
+                                </div>                                
+                                <div class="relative">
+                                    <input type="time" id="form-hours-end" required 
+                                        class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
+                                </div>
+                            </div>
+                            <input type="hidden" id="form-hours">
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Địa chỉ</label>
                         <textarea id="form-address" oninput="updateCoordsFromAddress()" required class="w-full p-2.5 border rounded-lg h-24 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"></textarea>
                     </div>
-
                     <div class="flex items-center gap-2">
                         <input type="checkbox" id="form-active" checked class="w-4 h-4 text-emerald-600 border-gray-300 rounded">
                         <label for="form-active" class="text-xs font-bold text-gray-600 uppercase">Đang hoạt động</label>
                     </div>
                 </div>
-
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Hình ảnh chi nhánh</label>
@@ -144,7 +145,6 @@
                             <img id="image-preview" class="hidden w-full h-32 object-cover rounded-lg shadow-sm">
                         </div>
                     </div>
-
                     <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
                         <p class="text-[10px] font-bold text-emerald-700 uppercase mb-2">Tọa độ thực tế</p>
                         <div class="grid grid-cols-2 gap-2">
@@ -155,7 +155,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="mt-6 flex space-x-3">
                 <button type="button" onclick="closeModal()" class="flex-1 px-4 py-2.5 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl transition font-medium">Hủy</button>
                 <button type="button" onclick="saveBranch(event)" id="submit-btn" class="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 shadow-md transition font-medium">Lưu chi nhánh</button>
@@ -163,7 +162,6 @@
         </form>
     </div>
 </div>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     var map = L.map('branch-map').setView([10.7769, 106.7009], 12);
@@ -172,13 +170,11 @@
     var tempMarker = null;
     var reverseGeocodeTimeout = null;
     var forwardGeocodeTimeout = null;
-    
     var redIcon = L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
         iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
     });
-
     var branchesData = {{ branches_json|safe }};
     branchesData.forEach(function(b) {
         let latFixed = parseFloat(b.lat).toFixed(6);
@@ -187,7 +183,6 @@
             .bindPopup(`<div class="p-1"><strong>${b.name}</strong><br><span class="text-xs">${b.address}</span></div>`);
         markers[`${latFixed}-${lngFixed}`] = m;
     });
-
     // Preview Image Logic
     document.getElementById('branch-image').addEventListener('change', function(e) {
         const file = e.target.files[0];
@@ -203,7 +198,6 @@
             reader.readAsDataURL(file);
         }
     });
-
     function updateMarkerFromInput() {
         let lat = parseFloat(document.getElementById('input-lat').value);
         let lng = parseFloat(document.getElementById('input-lng').value);
@@ -214,7 +208,6 @@
             map.panTo(newPos);
         }
     }
-
     function updateCoordsFromAddress() {
         const address = document.getElementById('form-address').value;
         if (address.length < 5) return;
@@ -235,11 +228,9 @@
                 }).catch(() => {});
         }, 1200);
     }
-
     map.on('click', function(e) {
         openModalForAdd(e.latlng.lat, e.latlng.lng);
     });
-
     function openModalForAdd(lat, lng) {
         closeModal();
         const modal = document.getElementById('addBranchModal');
@@ -247,7 +238,6 @@
         document.getElementById('branch-id').value = "";
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-
         if(lat && lng) {
             document.getElementById('input-lat').value = lat.toFixed(6);
             document.getElementById('input-lng').value = lng.toFixed(6);
@@ -257,21 +247,17 @@
                 .then(data => { document.getElementById('form-address').value = data.display_name || ""; });
         }
     }
-
     function openEditModal(id, name, address, phone, lat, lng, hours, isActive, imageUrl) {
         closeModal();
         const modal = document.getElementById('addBranchModal');
         document.getElementById('modal-title').innerText = "Cập nhật chi nhánh";
         document.getElementById('branch-id').value = id;
-        
         document.getElementById('form-name').value = name;
         document.getElementById('form-phone').value = phone;
         document.getElementById('form-address').value = address;
-        document.getElementById('form-hours').value = hours;
         document.getElementById('form-active').checked = isActive;
         document.getElementById('input-lat').value = parseFloat(lat).toFixed(6);
         document.getElementById('input-lng').value = parseFloat(lng).toFixed(6);
-
         if (imageUrl) {
             const preview = document.getElementById('image-preview');
             const placeholder = document.getElementById('image-placeholder');
@@ -279,36 +265,40 @@
             preview.classList.remove('hidden');
             placeholder.classList.add('hidden');
         }
-
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         tempMarker = L.marker([lat, lng], {icon: redIcon}).addTo(map);
         map.flyTo([lat, lng], 17);
+        if (hours && hours.includes(' - ')) {
+        const parts = hours.split(' - ');
+        document.getElementById('form-hours-start').value = parts[0].trim();
+        document.getElementById('form-hours-end').value = parts[1].trim();
+    } else {
+        // Giá trị mặc định nếu dữ liệu cũ trống hoặc sai định dạng
+        document.getElementById('form-hours-start').value = "08:00";
+        document.getElementById('form-hours-end').value = "21:00";
     }
-
+    }
     function saveBranch(event) {
         const id = document.getElementById('branch-id').value;
         const formData = new FormData();
-        
+        const startTime = document.getElementById('form-hours-start').value;
+        const endTime = document.getElementById('form-hours-end').value;
+        const fullHours = `${startTime} - ${endTime}`;
         formData.append('name', document.getElementById('form-name').value);
         formData.append('address', document.getElementById('form-address').value);
         formData.append('phone', document.getElementById('form-phone').value);
-        formData.append('opening_hours', document.getElementById('form-hours').value);
+        formData.append('opening_hours', fullHours);
         formData.append('is_active', document.getElementById('form-active').checked);
-        
         const lat = document.getElementById('input-lat').value;
         const lng = document.getElementById('input-lng').value;
         formData.append('coordinates', `${lng},${lat}`);
-
         const imageFile = document.getElementById('branch-image').files[0];
         if (imageFile) formData.append('image', imageFile);
-
         const url = id ? `/admin-custom/branches/edit/${id}/` : '/admin-custom/branches/add/';
-        
         const btn = event.target;
         btn.disabled = true;
         btn.innerText = "Đang lưu...";
-
         fetch(url, {
             method: 'POST',
             headers: { 'X-CSRFToken': '{{ csrf_token }}' },
@@ -321,19 +311,18 @@
         })
         .finally(() => { btn.disabled = false; btn.innerText = "Lưu chi nhánh"; });
     }
-
     function closeModal() {
         document.getElementById('addBranchModal').classList.add('hidden');
         document.getElementById('addBranchModal').classList.remove('flex');
         document.getElementById('branch-form').reset();
         document.getElementById('image-preview').classList.add('hidden');
         document.getElementById('image-placeholder').classList.remove('hidden');
+        document.getElementById('form-hours-start').value = "";
+        document.getElementById('form-hours-end').value = "";
         if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
-        
         const content = document.getElementById("modal-content");
         content.style.position = ""; content.style.top = ""; content.style.left = ""; content.style.margin = "";
     }
-
     function focusBranch(lat, lng, rowId) {
         document.querySelectorAll('tr').forEach(r => r.classList.remove('branch-row-active'));
         document.getElementById(rowId).classList.add('branch-row-active');
@@ -341,13 +330,10 @@
         let key = `${parseFloat(lat).toFixed(6)}-${parseFloat(lng).toFixed(6)}`;
         if(markers[key]) markers[key].openPopup();
     }
-
     function confirmDelete(id, name) {
         if (confirm(`Xóa chi nhánh "${name}"?`)) window.location.href = `/admin-custom/branches/delete/${id}/`;
     }
-
     function openAddModalManual() { openModalForAdd(null, null); }
-    
     function filterBranches() {
         let input = document.getElementById('branch-search').value.toLowerCase();
         let rows = document.querySelectorAll('tbody tr');
@@ -358,7 +344,6 @@
         });
         document.getElementById('branch-count').innerText = `${visibleCount} cơ sở`;
     }
-
     // Modal Drag Logic
     dragElement(document.getElementById("modal-content"), document.getElementById("modal-header"));
     function dragElement(elmnt, header) {
@@ -380,7 +365,6 @@
             };
         };
     }
-
     lucide.createIcons();
 </script>
 {% endblock %}

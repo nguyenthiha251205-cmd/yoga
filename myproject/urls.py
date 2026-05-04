@@ -14,29 +14,37 @@ urlpatterns = [
     # ⚙️ DJANGO ADMIN (Mặc định)
     path('admin/', admin.site.urls),
     # 🏢 HỆ THỐNG SORAYOGA ADMIN (Giao diện Custom duy nhất)
-    # Đã xóa bỏ hoàn toàn staff-custom, gộp mọi chức năng quản lý vào đây
     path('admin-custom/', views.admin_dashboard, name='admin_dashboard'),
     # Quản lý Chi nhánh (GIS)
     path('admin-custom/branches/', views.admin_branches, name='admin_branches'),
     path('admin-custom/branches/edit/<int:branch_id>/', views.edit_branch, name='edit_branch'),
     path('admin-custom/branches/delete/<int:branch_id>/', views.delete_branch, name='delete_branch'),
+    path('admin-custom/branches/', views.admin_branches, name='admin_branches'),
+    path('admin-custom/branches/add/', views.admin_branches, name='add_branch'), # THÊM DÒNG NÀY
+    path('admin-custom/branches/edit/<int:branch_id>/', views.edit_branch, name='edit_branch'),
     # Quản lý Lớp học & Lịch tập
     path('admin-custom/classes/', views.admin_class_list, name='admin_class_list'),
     path('admin-custom/classes/edit/<int:class_id>/', views.edit_class, name='edit_class'),
     path('admin-custom/classes/delete/<int:class_id>/', views.delete_class, name='delete_class'),
     path('admin-custom/classes/<int:class_id>/schedule/', views.manage_schedule, name='manage_schedule'),
+    # --- DÒNG MỚI THÊM: Quản lý danh sách học viên trong từng lớp ---
+    path('admin-custom/classes/<int:class_id>/students/', views.admin_class_students, name='admin_class_students'),
+    path('admin-custom/classes/<int:class_id>/students/remove/<int:user_id>/', views.remove_student_from_class, name='remove_student_from_class'),
+    path('admin-custom/classes/<int:class_id>/students/export/', views.export_class_students_csv, name='export_class_students_csv'),
     path('admin-custom/schedule/update/<int:schedule_id>/', views.update_schedule, name='update_schedule'),
     path('admin-custom/schedule/delete/<int:schedule_id>/', views.delete_schedule, name='delete_schedule'),
     # Quản lý Bài viết (Blog)
     path('admin-custom/blog/', views.admin_blog_list, name='admin_blog_list'),
     path('admin-custom/blog/edit/<int:post_id>/', views.edit_post, name='edit_post'),
     path('admin-custom/blog/delete/<int:post_id>/', views.delete_post, name='delete_post'),
-    # Quản lý Đơn đăng ký (Booking) - Đây là nơi Admin thay thế Nhân viên xử lý dữ liệu
+    # Quản lý Đơn đăng ký (Booking)
     path('admin-custom/bookings/', views.admin_booking_list, name='admin_booking_list'),
     path('admin-custom/bookings/update/<int:booking_id>/', views.update_booking_status, name='update_booking_status'),
     path('admin-custom/contacts/', views.admin_contact_list, name='admin_contact_list'),
+    path('admin-custom/contacts/history/<str:email>/', views.admin_contact_history, name='admin_contact_history'),
     path('admin-custom/contacts/delete/<int:msg_id>/', views.delete_contact_msg, name='delete_contact_msg'),
     path('admin-custom/contacts/reply/', views.reply_contact_msg, name='reply_contact_msg'),
+    path('admin-custom/chat/', views.admin_chat_interface, name='admin_chat_interface'),
     # Quản lý Giáo viên
     path('admin-custom/teachers/', views.admin_teacher_list, name='admin_teacher_list'),
     path('admin-custom/teachers/edit/<int:teacher_id>/', views.edit_teacher, name='edit_teacher'),
@@ -54,13 +62,24 @@ urlpatterns = [
     path('register.html/', views.register_view, name='register'),
     path('registration-info.html/', views.registration_info_view, name='registration_info'),
     path('post.html/<slug:slug>/', views.post_view, name='post'),
-    # 🗺️ GIS & MAP (Dành cho khách tìm chi nhánh)
+    # 🗺️ GIS & MAP
     path('map/', views.map_view, name='map'),
     path('branch/<int:branch_id>/', views.branch_detail, name='branch_detail'),
     path('api/branch/<int:branch_id>/reviews/', views.get_branch_reviews, name='get_branch_reviews'),
     path('submit-review/', views.submit_review, name='submit_review'),
+    # Chat API
+    path('api/chat/', views.chat_api, name='chat_api'),
+    path('api/check-auth/', views.check_auth, name='check_auth'),
+    path('api/chat-messages/', views.chat_messages_api, name='chat_messages_api'),
+    path('api/admin-chat/', views.admin_chat_api, name='admin_chat_api'),
+    path('api/customer-status/', views.customer_status_api, name='customer_status_api'),
+    # Server-Sent Events for real-time chat
+    path('api/chat-stream/', views.chat_stream_view, name='chat_stream'),
+    path('api/admin-chat-stream/', views.admin_chat_stream_view, name='admin_chat_stream'),
+    # Test endpoints
+    path('api/test-simple/', views.test_simple_view, name='test_simple'),
+    path('api/test-sse/', views.test_sse_view, name='test_sse'),
 ]
-# ✅ Cấu hình Static và Media (Chuẩn chỉnh cho môi trường Development)
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -9,85 +9,152 @@
         border-radius: 0.75rem;
         z-index: 1;
     }
+    .animate-slide-in-left {
+        animation: slide-in-left 0.5s;
+    }
+    @keyframes slide-in-left {
+        0% {
+            transform: translateX(-100px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    .stagger-animation {
+        animation: stagger 0.5s;
+    }
+    @keyframes stagger {
+        0% {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    .stagger-animation > * {
+        animation-delay: calc(0.1s * var(--i));
+    }
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
 </style>
 {% endblock %}
 {% block admin_content %}
-<div class="mb-8 flex justify-between items-end">
+<div class="mb-8 flex justify-between items-end animate-fade-in">
     <div>
-        <h1 class="text-2xl font-bold text-gray-800">Tổng quan hệ thống SoraYoga</h1>
-        <p class="text-gray-600">Chào mừng trở lại, <span class="text-emerald-600 font-bold">{{ user.username }}</span>!</p>
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-[var(--text-dark)] via-[var(--primary-color)] to-[var(--primary-light)] bg-clip-text text-transparent">Tổng quan hệ thống SoraYoga</h1>
+        <p class="text-[var(--text-light)] mt-2">Chào mừng trở lại, <span class="text-[var(--primary-color)] font-bold">{{ user.username }}</span>!</p>
     </div>
-    <div class="text-sm text-gray-500 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
-        <i data-lucide="calendar" class="w-4 h-4 inline-block mr-1"></i> {% now "d/m/Y H:i" %}
+    <div class="text-sm text-gray-500 admin-card px-6 py-3 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-all duration-300">
+        <i data-lucide="calendar" class="w-4 h-4 inline-block mr-2 text-emerald-500"></i> {% now "d/m/Y H:i" %}
     </div>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-emerald-500">
-        <div class="flex items-center justify-between">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 stagger-animation">
+    <div class="stat-card admin-card p-6 rounded-xl border-b-4 border-emerald-500 hover:border-emerald-600" style="--i: 1;">
+        <div class="flex items-center justify-between relative z-10">
             <div>
                 <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Chi nhánh</p>
-                <p class="text-2xl font-bold text-gray-800">{{ total_branches }}</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_branches }}</p>
             </div>
-            <div class="bg-emerald-50 p-3 rounded-lg"><i data-lucide="map-pin" class="text-emerald-600 w-6 h-6"></i></div>
+            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-xl shadow-lg hover:shadow-emerald-200/50 transition-all duration-300 hover:scale-110">
+                <i data-lucide="map-pin" class="text-emerald-600 w-7 h-7"></i>
+            </div>
         </div>
     </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-amber-500">
-        <div class="flex items-center justify-between">
+    <div class="stat-card admin-card p-6 rounded-xl border-b-4 border-amber-500 hover:border-amber-600" style="--i: 2;">
+        <div class="flex items-center justify-between relative z-10">
             <div>
                 <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Đơn mới (Chờ)</p>
-                <p class="text-2xl font-bold text-gray-800">{{ pending_bookings }} / {{ total_bookings }}</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2">{{ pending_bookings }} / {{ total_bookings }}</p>
             </div>
-            <div class="bg-amber-50 p-3 rounded-lg"><i data-lucide="users" class="text-amber-600 w-6 h-6"></i></div>
+            <div class="bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-xl shadow-lg hover:shadow-amber-200/50 transition-all duration-300 hover:scale-110">
+                <i data-lucide="users" class="text-amber-600 w-7 h-7"></i>
+            </div>
         </div>
     </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-blue-500">
-        <div class="flex items-center justify-between">
+    <div class="stat-card admin-card p-6 rounded-xl border-b-4 border-blue-500 hover:border-blue-600" style="--i: 3;">
+        <div class="flex items-center justify-between relative z-10">
             <div>
                 <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Bài viết</p>
-                <p class="text-2xl font-bold text-gray-800">{{ total_posts }}</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_posts }}</p>
             </div>
-            <div class="bg-blue-50 p-3 rounded-lg"><i data-lucide="file-text" class="text-blue-600 w-6 h-6"></i></div>
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl shadow-lg hover:shadow-blue-200/50 transition-all duration-300 hover:scale-110">
+                <i data-lucide="file-text" class="text-blue-600 w-7 h-7"></i>
+            </div>
         </div>
     </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-purple-500">
-        <div class="flex items-center justify-between">
+    <div class="stat-card admin-card p-6 rounded-xl border-b-4 border-purple-500 hover:border-purple-600" style="--i: 4;">
+        <div class="flex items-center justify-between relative z-10">
             <div>
                 <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Lớp học</p>
-                <p class="text-2xl font-bold text-gray-800">{{ total_classes }}</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_classes }}</p>
             </div>
-            <div class="bg-purple-50 p-3 rounded-lg"><i data-lucide="yoga" class="text-purple-600 w-6 h-6"></i></div>
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl shadow-lg hover:shadow-purple-200/50 transition-all duration-300 hover:scale-110">
+                <i data-lucide="activity" class="text-purple-600 w-7 h-7"></i>
+            </div>
         </div>
     </div>
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 class="font-bold text-gray-700 mb-4 flex items-center justify-between">
-            <span class="flex items-center"><i data-lucide="map" class="w-5 h-5 mr-2"></i> Mạng lưới chi nhánh</span>
-            <a href="{% url 'admin_branches' %}" class="text-xs text-emerald-600 hover:underline">Quản lý map</a>
-        </h3>
-        <div id="admin-map" class="border border-gray-100"></div>
+    <div class="lg:col-span-2 admin-card p-6 rounded-xl border border-gray-100 hover:border-emerald-200">
+        <div class="animate-fade-in" style="animation-delay: 0.2s;">
+            <h3 class="font-bold text-gray-700 mb-4 flex items-center justify-between">
+                <span class="flex items-center">
+                    <i data-lucide="map" class="w-5 h-5 mr-2 text-emerald-500"></i> 
+                    <span class="bg-gradient-to-r from-[var(--text-dark)] via-[var(--primary-color)] to-[var(--primary-light)] bg-clip-text text-transparent">Mạng lưới chi nhánh</span>
+                </span>
+                <a href="{% url 'admin_branches' %}" class="text-xs text-[var(--primary-color)] hover:text-[var(--primary-dark)] hover:underline transition-colors font-medium transform hover:scale-105 inline-block">Quản lý map</a>
+            </h3>
+            <div id="admin-map" class="border border-gray-100 rounded-lg overflow-hidden shadow-inner"></div>
+        </div>
     </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 class="font-bold text-gray-700 mb-4 flex items-center justify-between">
-            <span class="flex items-center"><i data-lucide="bell" class="w-5 h-5 mr-2"></i> Đăng ký mới nhất</span>
-            <a href="{% url 'admin_booking_list' %}" class="text-xs text-blue-600 hover:underline">Xem tất cả</a>
-        </h3>
-        <div class="space-y-4">
-            {% for b in recent_bookings %}
-            <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition border-l-4 {% if b.status == 'pending' %}border-amber-400 bg-amber-50/30{% else %}border-gray-200{% endif %}">
-                <div class="flex-grow">
-                    <p class="text-sm font-bold text-gray-800">{{ b.full_name }}</p>
-                    <p class="text-xs text-gray-500 italic">{{ b.yoga_class.name }}</p>
+    <div class="admin-card p-6 rounded-xl border border-gray-100 hover:border-amber-200">
+        <div class="animate-fade-in" style="animation-delay: 0.3s;">
+            <h3 class="font-bold text-gray-700 mb-4 flex items-center justify-between">
+                <span class="flex items-center">
+                    <i data-lucide="bell" class="w-5 h-5 mr-2 text-amber-500 pulse-animation"></i> 
+                    <span class="bg-gradient-to-r from-[var(--text-dark)] via-[var(--accent-color)] to-[var(--primary-light)] bg-clip-text text-transparent">Đăng ký mới nhất</span>
+                </span>
+                <a href="{% url 'admin_booking_list' %}" class="text-xs text-amber-600 hover:text-amber-700 hover:underline transition-colors font-medium transform hover:scale-105 inline-block">Xem tất cả</a>
+            </h3>
+            <div class="space-y-4 max-h-96 overflow-y-auto">
+                {% for b in recent_bookings %}
+                <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-all duration-300 border-l-4 {% if b.status == 'pending' %}border-amber-400 bg-amber-50/30 hover:bg-amber-50/50{% else %}border-gray-200 hover:border-gray-300{% endif %} hover:shadow-md">
+                    <div class="flex-grow">
+                        <p class="text-sm font-bold text-gray-800">{{ b.full_name }}</p>
+                        <p class="text-xs text-gray-500 italic">{{ b.yoga_class.name }}</p>
+                        <p class="text-[10px] text-gray-400 mt-1">{{ b.booking_date|timesince }} trước</p>
+                    </div>
+                    <div class="text-xs">
+                        <span class="px-2 py-1 rounded-full {% if b.status == 'pending' %}bg-amber-100 text-amber-700 border border-amber-200{% else %}bg-gray-100 text-gray-600 border border-gray-200{% endif %} font-medium hover:scale-105 transition-transform">
+                            {{ b.get_status_display }}
+                        </span>
+                    </div>
                     <p class="text-[10px] text-gray-400 mt-1">{{ b.booking_date|timesince }} trước</p>
                 </div>
                 <div class="text-xs">
-                    <span class="px-2 py-0.5 rounded-full {% if b.status == 'pending' %}bg-amber-100 text-amber-700{% else %}bg-gray-100 text-gray-600{% endif %} font-medium">
+                    <span class="px-2 py-1 rounded-full {% if b.status == 'pending' %}bg-amber-100 text-amber-700 border border-amber-200{% else %}bg-gray-100 text-gray-600 border border-gray-200{% endif %} font-medium hover:scale-105 transition-transform">
                         {{ b.get_status_display }}
                     </span>
                 </div>
             </div>
             {% empty %}
-            <p class="text-sm text-gray-400 text-center py-8 italic">Chưa có dữ liệu đăng ký mới.</p>
+            <p class="text-sm text-gray-400 text-center py-8 italic bg-gray-50 rounded-lg">Chưa có dữ liệu đăng ký mới.</p>
             {% endfor %}
         </div>
     </div>
@@ -97,7 +164,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         var map = L.map('admin-map').setView([10.7769, 106.7009], 11);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19, attribution: '© OpenStreetMap'
+            maxZoom: 19, 
+            attribution: ' OpenStreetMap'
         }).addTo(map);
         var branches = {{ branches_json|safe }};
         if (branches.length > 0) {

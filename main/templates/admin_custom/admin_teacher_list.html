@@ -1,11 +1,10 @@
 {% extends "admin_custom/base_admin.html" %}
 {% block admin_content %}
-<div class="flex justify-between items-center mb-6">
+<div class="flex justify-between items-center mb-6 animate-fade-in">
     <div>
-        <h1 class="text-2xl font-bold text-gray-800">Quản lý Đội ngũ Giáo viên</h1>
-        <p class="text-sm text-gray-500">Thông tin này sẽ đồng bộ với bộ lọc tại trang Lịch trình</p>
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-[var(--text-dark)] via-[var(--primary-color)] to-[var(--primary-light)] bg-clip-text text-transparent">Quản lý Đội ngũ Giáo viên</h1>
+        <p class="text-sm text-[var(--text-light)]">Thông tin này sẽ đồng bộ với bộ lọc tại trang Lịch trình</p>
     </div>
-    
     <div class="flex items-center gap-3">
         <div class="relative">
             <select id="filterBranch" onchange="filterByBranch()" class="appearance-none bg-white border border-gray-200 text-gray-700 py-2 px-4 pr-10 rounded-lg text-sm focus:outline-none focus:border-emerald-500 cursor-pointer shadow-sm">
@@ -20,13 +19,11 @@
                 <i data-lucide="map-pin" class="w-4 h-4"></i>
             </div>
         </div>
-
         <button onclick="openAddTeacherModal()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition flex items-center shadow-sm font-bold">
             <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i> Thêm giáo viên
         </button>
     </div>
 </div>
-
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
     <table class="w-full text-left border-collapse">
         <thead class="bg-gray-50">
@@ -39,9 +36,9 @@
                 <th class="p-4 text-xs font-bold text-gray-500 uppercase text-right">Thao tác</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody class="divide-y divide-gray-100 stagger-animation">
             {% for t in teachers %}
-            <tr class="hover:bg-gray-50 transition-colors">
+            <tr class="hover:bg-[var(--secondary-color)] transition-all duration-300 group">
                 <td class="p-4">
                     {% if t.image %}
                     <img src="{{ t.image.url }}" alt="{{ t.name }}" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-100">
@@ -97,9 +94,8 @@
         </tbody>
     </table>
 </div>
-
 <div id="addTeacherModal" class="fixed inset-0 bg-slate-900/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col relative animate-in fade-in zoom-in duration-200">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl flex flex-col relative animate-in fade-in zoom-in duration-200 overflow-hidden">
         <div class="p-6 border-b bg-gray-50 flex justify-between items-center">
             <h2 class="text-xl font-bold text-gray-800">Thêm giáo viên mới</h2>
             <button onclick="toggleModal('addTeacherModal')" class="text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
@@ -111,15 +107,14 @@
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Họ và tên</label>
                     <input type="text" name="name" required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
                 </div>
-     <div class="col-span-2">
-    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Chi nhánh quản lý chính</label>
-    <select id="edit-branch" name="branch" class="w-full p-2.5 border rounded-lg outline-none focus:border-emerald-500 bg-white">
-        <option value="">-- Chọn chi nhánh --</option>
-        {% for b in branches %}
-        <option value="{{ b.id }}">{{ b.name }}</option>
-        {% endfor %}
-    </select>
-</div>
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Chi nhánh quản lý chính</label>
+                    <select name="branch" class="w-full p-2.5 border rounded-lg outline-none focus:border-emerald-500 bg-white">
+                        <option value="">-- Chọn chi nhánh --</option>
+                        {% for b in branches %}
+                        <option value="{{ b.id }}">{{ b.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="col-span-2">
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Các chi nhánh làm việc (Tích chọn nhiều)</label>
@@ -153,16 +148,15 @@
                 <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Ảnh đại diện</label>
                 <input type="file" name="image" accept="image/*" required class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
             </div>
-            <div class="flex space-x-3 pt-4">
+            <div class="flex space-x-3 pt-4 border-t">
                 <button type="button" onclick="toggleModal('addTeacherModal')" class="flex-1 py-3 border rounded-xl hover:bg-gray-50 font-medium transition-colors">Hủy</button>
                 <button type="submit" class="flex-1 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold shadow-lg transition-transform active:scale-95">Lưu giáo viên</button>
             </div>
         </form>
     </div>
 </div>
-
 <div id="editTeacherModal" class="fixed inset-0 bg-slate-900/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col relative">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl flex flex-col relative animate-in fade-in zoom-in duration-200 overflow-hidden">
         <div class="p-6 border-b bg-gray-50 flex justify-between items-center">
             <h2 class="text-xl font-bold text-emerald-800">Cập nhật giáo viên</h2>
             <button onclick="toggleModal('editTeacherModal')" class="text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
@@ -196,38 +190,36 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Chức vụ</label>
-                    <input type="text" id="edit-title" name="title" required class="w-full p-2.5 border rounded-lg outline-none">
+                    <input type="text" id="edit-title" name="title" required class="w-full p-2.5 border rounded-lg outline-none focus:border-emerald-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Thứ tự</label>
-                    <input type="number" id="edit-order" name="order" class="w-full p-2.5 border rounded-lg outline-none">
+                    <input type="number" id="edit-order" name="order" class="w-full p-2.5 border rounded-lg outline-none focus:border-emerald-500">
                 </div>
                 <div class="col-span-2">
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Kinh nghiệm</label>
-                    <input type="text" id="edit-experience" name="experience" class="w-full p-2.5 border rounded-lg outline-none">
+                    <input type="text" id="edit-experience" name="experience" class="w-full p-2.5 border rounded-lg outline-none focus:border-emerald-500">
                 </div>
                 <div class="col-span-2">
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Chuyên môn</label>
-                    <input type="text" id="edit-specialty" name="specialty" class="w-full p-2.5 border rounded-lg outline-none">
+                    <input type="text" id="edit-specialty" name="specialty" class="w-full p-2.5 border rounded-lg outline-none focus:border-emerald-500">
                 </div>
             </div>
             <div>
                 <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Ảnh mới (Bỏ trống nếu không đổi)</label>
                 <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
             </div>
-            <div class="flex space-x-3 pt-4">
+            <div class="flex space-x-3 pt-4 border-t">
                 <button type="button" onclick="toggleModal('editTeacherModal')" class="flex-1 py-3 border rounded-xl hover:bg-gray-50 font-medium">Đóng</button>
                 <button type="submit" class="flex-1 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold shadow-lg transition-transform active:scale-95">Cập nhật ngay</button>
             </div>
         </form>
     </div>
 </div>
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     });
-
     function filterByBranch() {
         const branchId = document.getElementById('filterBranch').value;
         const url = new URL(window.location.href);
@@ -235,26 +227,20 @@
         else url.searchParams.delete('branch');
         window.location.href = url.toString();
     }
-
     function toggleModal(id) {
         const modal = document.getElementById(id);
         if (modal) modal.classList.toggle('hidden');
     }
-
-    // Mở modal thêm mới và reset dữ liệu
     function openAddTeacherModal() {
         const modal = document.getElementById('addTeacherModal');
         const form = modal.querySelector('form');
         form.reset();
-        // Bỏ tích tất cả checkbox chi nhánh
         form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
         toggleModal('addTeacherModal');
     }
-
     function openEditTeacherModal(id, name, title, experience, specialty, order, branchId) {
         const form = document.getElementById('editTeacherForm');
         const btn = event.currentTarget.closest('.edit-teacher-btn');
-        
         if (form) {
             form.action = `/admin-custom/teachers/edit/${id}/`;
             document.getElementById('edit-name').value = name;
@@ -262,17 +248,13 @@
             document.getElementById('edit-experience').value = experience;
             document.getElementById('edit-specialty').value = specialty;
             document.getElementById('edit-order').value = order;
-            
             const branchSelect = document.getElementById('edit-branch');
             if (branchSelect) branchSelect.value = branchId;
-
-            // Xử lý tích chọn chi nhánh từ data-working-branches
             const workingBranchIds = JSON.parse(btn.getAttribute('data-working-branches') || '[]');
             const checkboxes = form.querySelectorAll('input[name="working_branches"]');
             checkboxes.forEach(cb => {
                 cb.checked = workingBranchIds.includes(cb.value);
             });
-
             toggleModal('editTeacherModal');
         }
     }

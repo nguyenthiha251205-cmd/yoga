@@ -15,16 +15,20 @@
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <style>
     [x-cloak] { display: none !important; }
-    /* Ẩn thanh cuộn nhưng vẫn cuộn được để giao diện sạch sẽ (tùy chọn) */
     .scroll-container::-webkit-scrollbar { width: 4px; }
     .scroll-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 </style>
 
-<div x-data="{ openModal: false, showNotify: false }" class="bg-[#f8fafc] min-h-screen py-8 overflow-hidden">
+<div x-data="{ openModal: false, showNotify: false }" class="bg-[var(--bg-light)] min-h-screen py-8 relative">
     <div class="max-w-6xl mx-auto px-4">
         
+        <div class="text-center mb-16 animate-fade-in">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[var(--text-dark)] via-[var(--primary-color)] to-[var(--primary-light)] bg-clip-text text-transparent section-title">Thông Tin Cá Nhân</h1>
+            <div class="w-20 h-1 bg-gradient-to-r from-[var(--primary-color)] to-[var(--accent-color)] mx-auto mb-6 rounded-full section-divider"></div>
+        </div>
+        
         <div class="mb-6">
-            <a href="/" class="inline-flex items-center text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
+            <a href="/" class="inline-flex items-center text-sm font-bold text-[var(--primary-color)] hover:text-[var(--primary-dark)] transition-colors">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Quay lại Trang chủ
             </a>
@@ -32,25 +36,25 @@
 
         <div class="flex flex-col md:flex-row gap-8">
             <div class="w-full md:w-1/3">
-                <div class="bg-white rounded-[32px] p-8 shadow-sm border border-gray-100 text-center sticky top-8">
-                    <div class="w-24 h-24 bg-emerald-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4">
+                <div class="bg-white rounded-[32px] p-8 shadow-sm border border-gray-100 text-center md:sticky md:top-8">
+                    <div class="w-24 h-24 bg-gradient-to-r from-[var(--primary-color)] to-[var(--primary-light)] text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4 shadow-lg">
                         {{ user.username|first|upper }}
                     </div>
-                    <h2 class="text-2xl font-bold text-gray-800">{{ user.first_name|default:user.username }}</h2>
-                    <p class="text-gray-400 text-sm mb-6">{{ user.email }}</p>
+                    <h2 class="text-2xl font-bold text-[var(--text-dark)]">{{ user.first_name|default:user.username }}</h2>
+                    <p class="text-[var(--text-light)] text-sm mb-6">{{ user.email }}</p>
                     
-                    <div class="space-y-3 text-left border-t border-gray-50 pt-6">
+                    <div class="space-y-3 text-left border-t border-[var(--primary-color)]/10 pt-6">
                         <div class="flex items-center text-sm">
-                            <span class="text-gray-400 w-8"><i class="fas fa-phone"></i></span>
-                            <span class="text-gray-700 font-medium">{{ profile.phone_number|default:"Chưa cập nhật" }}</span>
+                            <span class="text-[var(--text-light)] w-8"><i class="fas fa-phone"></i></span>
+                            <span class="text-[var(--text-dark)] font-medium">{{ profile.phone_number|default:"Chưa cập nhật" }}</span>
                         </div>
                         <div class="flex items-center text-sm">
-                            <span class="text-gray-400 w-8"><i class="fas fa-calendar-alt"></i></span>
-                            <span class="text-gray-700 font-medium">Gia nhập: {{ user.date_joined|date:"d/m/Y" }}</span>
+                            <span class="text-[var(--text-light)] w-8"><i class="fas fa-calendar-alt"></i></span>
+                            <span class="text-[var(--text-dark)] font-medium">Gia nhập: {{ user.date_joined|date:"d/m/Y" }}</span>
                         </div>
                     </div>
 
-                    <button @click="openModal = true" class="w-full mt-8 py-4 bg-gray-900 text-white rounded-2xl font-bold">
+                    <button type="button" @click.prevent="openModal = true" class="w-full mt-8 py-4 bg-gradient-to-r from-[var(--primary-color)] to-[var(--primary-light)] text-white rounded-2xl font-bold hover:from-[var(--primary-dark)] hover:to-[var(--primary-color)] transition-all cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
                         Chỉnh sửa hồ sơ
                     </button>
                 </div>
@@ -58,7 +62,7 @@
 
             <div class="w-full md:w-2/3 flex flex-col h-full">
                 <div class="flex justify-between items-center mb-6 px-4 shrink-0">
-                    <h3 class="text-2xl font-bold text-gray-800">Khóa học chính thức</h3>
+                    <h3 class="text-2xl font-bold text-[var(--text-dark)]">Khóa học chính thức</h3>
                     
                     <div class="relative">
                         <button @click="showNotify = !showNotify" class="relative p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
@@ -69,7 +73,7 @@
                         </button>
 
                         <div x-show="showNotify" @click.away="showNotify = false" x-cloak
-                             class="absolute right-0 mt-3 w-80 bg-white rounded-[24px] shadow-2xl border border-gray-100 z-50 overflow-hidden">
+                             class="absolute right-0 mt-3 w-64 sm:w-80 bg-white rounded-[24px] shadow-2xl border border-gray-100 z-50 overflow-hidden">
                             <div class="p-4 border-b border-gray-50 bg-gray-50/50">
                                 <span class="text-xs font-bold text-gray-500 uppercase">Đăng ký mới</span>
                             </div>
@@ -101,25 +105,28 @@
                                     <div class="flex-1">
                                         <div class="flex items-center gap-3 mb-2">
                                             <h4 class="text-xl font-black text-gray-800">{{ b.yoga_class.name }}</h4>
-                                            <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase italic">Đang tham gia</span>
+                                            <span class="bg-[var(--primary-color)]/10 text-[var(--primary-color)] text-[10px] font-bold px-3 py-1 rounded-full uppercase italic">Đang tham gia</span>
                                         </div>
-                                        <p class="text-sm text-gray-400 mb-4 italic">
-                                            <i class="fas fa-map-marker-alt mr-1 text-emerald-500/50"></i> {{ b.yoga_class.branch.name }}
+                                        <p class="text-sm text-[var(--text-light)] mb-4 italic">
+                                            <i class="fas fa-map-marker-alt mr-1 text-[var(--primary-color)]/50"></i> {{ b.yoga_class.branch.name }}
                                         </p>
 
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            {% for s in b.yoga_class.schedules.all %}
-                                            <div class="flex justify-between items-center bg-[#f8fafc] p-3 rounded-2xl border border-gray-50">
-                                                <span class="text-xs font-bold text-gray-500 uppercase">{{ s.get_day_of_week_display }}</span>
-                                                <span class="text-sm font-black text-gray-800">{{ s.start_time|time:"H:i" }} - {{ s.end_time|time:"H:i" }}</span>
+                                            <!-- PHẦN SỬA LỖI HIỂN THỊ TẠI ĐÂY -->
+                                            {% for s in b.processed_sessions %}
+                                            <div class="flex justify-between items-center bg-[var(--bg-light)] p-3 rounded-2xl border border-[var(--primary-color)]/10">
+                                                <span class="text-xs font-bold text-[var(--primary-color)] uppercase">{{ s.day }}</span>
+                                                <span class="text-sm font-black text-[var(--text-dark)]">{{ s.time }}</span>
                                             </div>
+                                            {% empty %}
+                                            <p class="text-xs text-gray-400 italic">Chưa chọn khung giờ</p>
                                             {% endfor %}
                                         </div>
                                     </div>
                                     
-                                    <div class="md:w-32 flex flex-col justify-center items-end md:items-center border-t md:border-t-0 md:border-l border-gray-50 pt-4 md:pt-0 md:pl-6">
-                                        <span class="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">Ngày bắt đầu</span>
-                                        <p class="text-lg font-black text-emerald-600">{{ b.booking_date|date:"d/m/Y" }}</p>
+                                    <div class="md:w-32 flex flex-col justify-center items-end md:items-center border-t md:border-t-0 md:border-l border-[var(--primary-color)]/10 pt-4 md:pt-0 md:pl-6">
+                                        <span class="text-[10px] font-black text-[var(--text-light)] uppercase tracking-widest mb-1">Ngày bắt đầu</span>
+                                        <p class="text-lg font-black text-[var(--primary-color)]">{{ b.booking_date|date:"d/m/Y" }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -130,28 +137,33 @@
             </div>
         </div>
     </div>
-</div>
 
-<div x-show="openModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-    <div class="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl" @click.away="openModal = false">
-        <h3 class="text-2xl font-black text-center text-gray-800 mb-6 uppercase">Cập nhật hồ sơ</h3>
-        <form method="POST" class="space-y-5">
-            {% csrf_token %}
-            <input type="hidden" name="update_profile" value="1">
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-widest">Họ và tên</label>
-                <input type="text" name="first_name" value="{{ user.first_name }}" class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500">
-            </div>
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-widest">Số điện thoại</label>
-                <input type="text" name="phone" value="{{ profile.phone_number|default:'' }}" class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500">
-            </div>
-            <div class="flex gap-3 pt-2">
-                <button type="button" @click="openModal = false" class="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold">Hủy</button>
-                <button type="submit" class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-200">Lưu</button>
-            </div>
-        </form>
+    <div x-show="openModal" 
+         class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" 
+         x-cloak>
+        <div class="bg-white rounded-[32px] p-8 max-w-md w-full mx-4 shadow-2xl" @click.away="openModal = false">
+            <h3 class="text-2xl font-black text-center text-[var(--text-dark)] mb-6 uppercase">Cập nhật hồ sơ</h3>
+            <form method="POST" class="space-y-5">
+                {% csrf_token %}
+                <input type="hidden" name="update_profile" value="1">
+                <div>
+                    <label class="block text-[10px] font-bold text-[var(--text-light)] uppercase mb-1 tracking-widest">Họ và tên</label>
+                    <input type="text" name="first_name" value="{{ user.first_name }}" class="w-full p-4 bg-[var(--bg-light)] border border-[var(--primary-color)]/20 rounded-2xl outline-none focus:ring-2 focus:ring-[var(--primary-color)]">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-[var(--text-light)] uppercase mb-1 tracking-widest">Số điện thoại</label>
+                    <input type="text" name="phone" value="{{ profile.phone_number|default:'' }}" 
+                           class="w-full p-4 bg-[var(--bg-light)] border border-[var(--primary-color)]/20 rounded-2xl outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
+                           maxlength="10" 
+                           pattern="[0-9]{10}" 
+                           placeholder="Nhập tối đa 10 số"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" @click="openModal = false" class="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold">Hủy</button>
+                    <button type="submit" class="flex-1 py-4 bg-gradient-to-r from-[var(--primary-color)] to-[var(--primary-light)] text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all">Lưu</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
-
-{% endblock %}
+</div> {% endblock %}

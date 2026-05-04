@@ -1,0 +1,71 @@
+{% extends "admin_custom/base_admin.html" %}
+{% block admin_content %}
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Quản lý Học viên</h1>
+        <p class="text-sm text-gray-500">Danh sách người dùng đã đăng ký tài khoản trên hệ thống</p>
+    </div>
+    <form method="GET" class="flex items-center gap-2">
+        <div class="relative">
+            <input type="text" name="search" value="{{ search_query }}" placeholder="Tên, username, SĐT..." 
+                   class="pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none shadow-sm w-64">
+            <div class="absolute inset-y-0 left-0 flex items-center px-3 text-gray-400">
+                <i data-lucide="search" class="w-4 h-4"></i>
+            </div>
+        </div>
+        <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition font-medium">Tìm</button>
+    </form>
+</div>
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="w-full text-left border-collapse">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Học viên</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Liên hệ</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Ngày tham gia</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Trạng thái</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase text-right">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for u in users %}
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold">
+                            {{ u.username|first|upper }}
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-800">{{ u.get_full_name|default:u.username }}</p>
+                            <p class="text-xs text-gray-500">@{{ u.username }}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="p-4">
+                    <p class="text-sm text-gray-700 font-medium">{{ u.email }}</p>
+                    <p class="text-xs text-gray-500">{{ u.profile.phone_number|default:"Chưa cập nhật SĐT" }}</p>
+                </td>
+                <td class="p-4 text-sm text-gray-600">
+                    {{ u.date_joined|date:"d/m/Y" }}
+                </td>
+                <td class="p-4">
+                    {% if u.is_active %}
+                    <span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-full border border-emerald-100 uppercase">Hoạt động</span>
+                    {% else %}
+                    <span class="px-2 py-1 bg-red-50 text-red-600 text-[10px] font-bold rounded-full border border-red-100 uppercase">Khóa</span>
+                    {% endif %}
+                </td>
+                <td class="p-4 text-right">
+                    <a href="{% url 'delete_user_custom' u.id %}" onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản {{ u.username }}?')" 
+                       class="p-2 text-red-600 hover:bg-red-50 rounded-lg inline-block transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="p-12 text-center text-gray-400 italic">Không tìm thấy học viên nào.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

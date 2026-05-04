@@ -1,0 +1,118 @@
+{% extends "admin_custom/base_admin.html" %}
+{% block admin_content %}
+<div class="mb-6 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+        <a href="{% url 'admin_class_list' %}?branch={{ yoga_class.branch.id }}" class="p-2 bg-white border rounded-lg hover:bg-gray-50 transition shadow-sm">
+            <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600"></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Danh sách học viên</h1>
+            <p class="text-sm text-gray-500">
+                Lớp: <span class="font-bold text-emerald-600">{{ yoga_class.name }}</span> 
+                | Chi nhánh: <span class="font-medium text-gray-700">{{ yoga_class.branch.name }}</span>
+            </p>
+        </div>
+    </div>
+    <div class="flex space-x-2">
+        <a href="{% url 'export_class_students_csv' yoga_class.id %}" 
+           class="bg-white border text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition flex items-center shadow-sm text-sm font-medium">
+            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Xuất Excel
+        </a>
+    </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center">
+        <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mr-4">
+            <i data-lucide="users" class="w-6 h-6"></i>
+        </div>
+        <div>
+            <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Tổng học viên</p>
+            <p class="text-xl font-bold text-gray-800">{{ students.count }} học viên</p>
+        </div>
+    </div>
+    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center">
+        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
+            <i data-lucide="user-check" class="w-6 h-6"></i>
+        </div>
+        <div>
+            <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">HLV phụ trách</p>
+            <p class="text-xl font-bold text-gray-800">{{ yoga_class.teacher.name|default:"Chưa phân công" }}</p>
+        </div>
+    </div>
+</div>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="w-full text-left border-collapse">
+        <thead class="bg-gray-50 border-b border-gray-100">
+            <tr>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Học viên</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Liên hệ</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase">Ngày ghi danh</th>
+                <th class="p-4 text-xs font-bold text-gray-500 uppercase text-right">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+            {% for student in students %}
+            <tr class="hover:bg-gray-50/50 transition-colors">
+                <td class="p-4">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold mr-3 shadow-sm">
+                            {{ student.last_name|slice:":1"|default:student.username|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-800">{{ student.get_full_name|default:student.username }}</p>
+                            <p class="text-xs text-gray-400">@{{ student.username }}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="p-4">
+                    <div class="space-y-1">
+                        <p class="text-sm text-gray-600 flex items-center">
+                            <i data-lucide="mail" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> {{ student.email }}
+                        </p>
+                        <p class="text-sm text-gray-600 flex items-center">
+                            <i data-lucide="phone" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> 
+                            {{ student.profile.phone_number|default:"Chưa cập nhật" }}
+                        </p>
+                    </div>
+                </td>
+                <td class="p-4">
+                    <span class="text-sm text-gray-500">
+                        {% with student.bookings.all|first as last_booking %}
+                            {{ last_booking.booking_date|date:"d/m/Y"|default:"--" }}
+                        {% endwith %}
+                    </span>
+                </td>
+                <td class="p-4 text-right">
+                    <a href="{% url 'remove_student_from_class' yoga_class.id student.id %}" 
+                       onclick="return confirm('Bạn có chắc chắn muốn mời học viên này rời khỏi lớp không?')"
+                       class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition inline-block" 
+                       title="Xóa khỏi lớp">
+                        <i data-lucide="user-minus" class="w-4 h-4"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="p-12 text-center">
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="user-x" class="w-8 h-8 text-gray-300"></i>
+                        </div>
+                        <p class="text-gray-500 font-medium">Chưa có học viên nào trong lớp này.</p>
+                        <p class="text-gray-400 text-sm mt-1">Các học viên sẽ xuất hiện ở đây sau khi đơn đăng ký được duyệt "Thành công".</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Khởi tạo các icon từ thư viện Lucide
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
+</script>
+{% endblock %}

@@ -6,6 +6,7 @@
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SoraYoga{% endblock %}</title>
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -47,5 +48,7 @@
             if (window.lucide) { window.lucide.createIcons(); }
         }, 1000);
     </script>
+    <!-- Chat Widget -->
+    <script src="{% static 'components/SimpleChatWidget.js' %}"></script>
 </body>
 </html>

@@ -2,12 +2,12 @@
 {% load static %}
 {% block admin_content %}
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-<div class="flex justify-between items-center mb-6">
+<div class="flex justify-between items-center mb-6 animate-fade-in">
     <div>
-        <h1 class="text-2xl font-bold text-gray-800">Quản lý Bài viết</h1>
-        <p class="text-sm text-gray-500">Chia sẻ kiến thức Yoga và tin tức hệ thống</p>
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-[var(--text-dark)] via-[var(--primary-color)] to-[var(--primary-light)] bg-clip-text text-transparent">Quản lý Bài viết</h1>
+        <p class="text-sm text-[var(--text-light)]">Chia sẻ kiến thức Yoga và tin tức hệ thống</p>
     </div>
-    <button onclick="toggleModal('addPostModal')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center shadow-sm">
+    <button onclick="toggleModal('addPostModal')" class="bg-gradient-to-r from-[var(--primary-color)] to-[var(--primary-light)] text-white px-4 py-2 rounded-lg hover:from-[var(--primary-dark)] hover:to-[var(--primary-color)] transition-all flex items-center shadow-sm font-bold transform hover:scale-105">
         <i data-lucide="pen-tool" class="w-4 h-4 mr-2"></i> Viết bài mới
     </button>
 </div>
@@ -21,9 +21,9 @@
                 <th class="p-4 text-xs font-bold text-gray-500 uppercase text-right">Thao tác</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody class="divide-y divide-gray-100 stagger-animation">
             {% for p in posts %}
-            <tr class="hover:bg-gray-50 transition-colors">
+            <tr class="hover:bg-[var(--secondary-color)] transition-all duration-300 group">
                 <td class="p-4 flex items-center space-x-4">
                     <div class="w-16 h-10 rounded bg-gray-200 overflow-hidden flex-shrink-0">
                         {% if p.image %}

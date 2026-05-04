@@ -1,6 +1,5 @@
 {% extends "admin_custom/base_admin.html" %}
 {% load humanize %}
-
 {% block admin_content %}
 <style>
     /* Thanh cuộn tùy chỉnh cho vùng danh sách lớp */
@@ -9,54 +8,55 @@
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #059669; }
 </style>
-
-<div class="flex justify-between items-center mb-6">
+<div class="flex justify-between items-center mb-6 animate-fade-in">
     <div>
-        <h1 class="text-2xl font-bold text-gray-800">Quản lý Lớp học & Dịch vụ</h1>
-        <p class="text-sm text-gray-500">Chọn chi nhánh bên trái để xem và quản lý danh sách lớp học</p>
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-[var(--text-dark)] via-[var(--primary-color)] to-[var(--primary-light)] bg-clip-text text-transparent">Quản lý Lớp học & Dịch vụ</h1>
+        <p class="text-sm text-[var(--text-light)]">Chọn chi nhánh bên trái để xem và quản lý danh sách lớp học</p>
     </div>
-    <button onclick="toggleModal('addClassModal')" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition flex items-center shadow-sm font-bold">
+    <button onclick="toggleModal('addClassModal')" class="bg-gradient-to-r from-[var(--primary-color)] to-[var(--primary-light)] text-white px-4 py-2 rounded-lg hover:from-[var(--primary-dark)] hover:to-[var(--primary-color)] transition-all flex items-center shadow-sm font-bold transform hover:scale-105">
         <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Thêm lớp mới
     </button>
 </div>
-
 <div class="grid grid-cols-12 gap-6">
     <div class="col-span-12 lg:col-span-4 space-y-3">
-        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Hệ thống chi nhánh</h3>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 sticky top-0 bg-white z-10">Hệ thống chi nhánh</h3>
+        <div class="max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar space-y-3 pr-2">
         
-        <div onclick="filterByBranch('all')" id="btn-all" class="branch-card cursor-pointer p-4 rounded-xl border-2 border-emerald-600 bg-emerald-50 transition-all shadow-sm group">
+        <a href="{% url 'admin_class_list' %}" 
+        class="block p-4 rounded-xl border-2 {% if not selected_branch_id %}border-emerald-600 bg-emerald-50 shadow-sm{% else %}border-transparent bg-white{% endif %} transition-all group">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white mr-3 group-hover:scale-110 transition-transform">
+                    <div class="w-10 h-10 rounded-lg {% if not selected_branch_id %}bg-emerald-600 text-white{% else %}bg-gray-100 text-gray-500{% endif %} flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
                         <i data-lucide="layers" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <p class="font-bold text-emerald-900">Tất cả chi nhánh</p>
+                        <p class="font-bold {% if not selected_branch_id %}text-emerald-900{% else %}text-gray-800{% endif %}">Tất cả chi nhánh</p>
                         <p class="text-xs text-emerald-600">Hiển thị toàn bộ lớp học</p>
                     </div>
                 </div>
                 <i data-lucide="chevron-right" class="w-5 h-5 text-emerald-400"></i>
             </div>
-        </div>
+        </a>
 
         {% for b in branches %}
-        <div onclick="filterByBranch('{{ b.name|escapejs }}', this)" class="branch-card cursor-pointer p-4 rounded-xl border-2 border-transparent bg-white hover:border-emerald-200 hover:shadow-md transition-all group">
+        <a href="?branch={{ b.id }}" 
+        class="block p-4 rounded-xl border-2 {% if b.id|slugify == selected_branch_id %}border-emerald-600 bg-emerald-50 shadow-sm{% else %}border-transparent bg-white{% endif %} hover:border-emerald-200 hover:shadow-md transition-all group">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 mr-3 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors">
+                    <div class="w-10 h-10 rounded-lg {% if b.id|slugify == selected_branch_id %}bg-emerald-600 text-white{% else %}bg-gray-100 text-gray-500 group-hover:bg-emerald-100 group-hover:text-emerald-600{% endif %} flex items-center justify-center mr-3 transition-colors">
                         <i data-lucide="map-pin" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <p class="font-bold text-gray-800 group-hover:text-emerald-700">{{ b.name }}</p>
+                        <p class="font-bold {% if b.id|slugify == selected_branch_id %}text-emerald-700{% else %}text-gray-800{% endif %} group-hover:text-emerald-700">{{ b.name }}</p>
                         <p class="text-xs text-gray-400">Xem danh sách lớp học</p>
                     </div>
                 </div>
                 <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-emerald-400"></i>
             </div>
-        </div>
+        </a>
         {% endfor %}
     </div>
-
+    </div>
     <div class="col-span-12 lg:col-span-8 flex flex-col h-[calc(100vh-200px)]">
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full">
             <div class="p-4 border-b bg-gray-50 flex justify-between items-center shrink-0">
@@ -72,26 +72,21 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="overflow-y-auto flex-grow custom-scrollbar">
-                <table class="w-full text-left border-collapse relative table-fixed">
+            <div class="overflow-auto flex-grow custom-scrollbar">
+                <table class="w-full text-left border-collapse relative table-auto min-w-[800px]">
                     <thead class="bg-gray-50 border-b border-gray-100 sticky top-0 z-10">
                         <tr>
-                            <th class="p-4 text-xs font-bold text-gray-500 uppercase bg-gray-50">Thông tin lớp</th>
+                            <th class="p-4 text-xs font-bold text-gray-500 uppercase bg-gray-50 w-80">Tên lớp</th>
                             <th class="p-4 text-xs font-bold text-gray-500 uppercase bg-gray-50 w-48">HLV & Thời lượng</th>
                             <th class="p-4 text-xs font-bold text-gray-500 uppercase bg-gray-50 w-40">Học phí</th>
                             <th class="p-4 text-xs font-bold text-gray-500 uppercase text-right bg-gray-50 w-32">Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody id="class-table-body" class="divide-y divide-gray-100">
+                    <tbody id="class-table-body" class="divide-y divide-gray-100 stagger-animation">
                         {% for c in classes %}
-                        <tr class="class-row hover:bg-emerald-50/30 transition-colors" data-branch="{{ c.branch.name }}">
-                            <td class="p-4 overflow-hidden">
+                        <tr class="class-row hover:bg-[var(--secondary-color)] transition-all duration-300 group" data-branch="{{ c.branch.name }}">
+                            <td class="p-4">
                                 <p class="font-bold text-gray-800 truncate" title="{{ c.name }}">{{ c.name }}</p>
-                                <div class="flex items-center mt-1">
-                                    <span class="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-[10px] font-bold uppercase mr-2 shrink-0">{{ c.branch.name }}</span>
-                                    <p class="text-xs text-gray-400 truncate">{{ c.description }}</p>
-                                </div>
                             </td>
                             <td class="p-4">
                                 <div class="text-sm text-gray-600">
@@ -114,6 +109,9 @@
                             </td>
                             <td class="p-4 text-right">
                                 <div class="flex justify-end space-x-1">
+                                    <a href="{% url 'admin_class_students' c.id %}" class="p-2 text-orange-600 hover:bg-orange-100 rounded-lg shrink-0" title="Danh sách học viên">
+                                        <i data-lucide="users" class="w-4 h-4"></i>
+                                    </a>
                                     <a href="{% url 'manage_schedule' c.id %}" class="p-2 text-emerald-600 hover:bg-emerald-100 rounded-lg shrink-0" title="Lịch tập">
                                         <i data-lucide="calendar" class="w-4 h-4"></i>
                                     </a>
@@ -141,7 +139,6 @@
         </div>
     </div>
 </div>
-
 <div id="addClassModal" class="fixed inset-0 bg-slate-900/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
         <div class="p-6 border-b bg-gray-50"><h2 class="text-xl font-bold text-gray-800">Tạo lớp học mới</h2></div>
@@ -189,7 +186,6 @@
         </form>
     </div>
 </div>
-
 <div id="editClassModal" class="fixed inset-0 bg-slate-900/60 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col">
         <div class="p-6 border-b bg-gray-50"><h2 class="text-xl font-bold text-gray-800">Cập nhật lớp học</h2></div>
@@ -239,7 +235,6 @@
         </form>
     </div>
 </div>
-
 <script>
     function filterByBranch(branchName, element) {
         const rows = document.querySelectorAll('.class-row');
@@ -247,7 +242,6 @@
         const noDataRow = document.getElementById('no-branch-data');
         const title = document.getElementById('current-view-title');
         let hasData = false;
-
         cards.forEach(card => {
             card.classList.remove('border-emerald-600', 'bg-emerald-50', 'shadow-sm');
             card.classList.add('border-transparent', 'bg-white');
@@ -255,14 +249,12 @@
             iconBox.classList.remove('bg-emerald-600', 'text-white');
             iconBox.classList.add('bg-gray-100', 'text-gray-500');
         });
-
         const target = element || document.getElementById('btn-all');
         target.classList.add('border-emerald-600', 'bg-emerald-50');
         target.classList.remove('border-transparent', 'bg-white');
         const activeIcon = target.querySelector('.w-10');
         activeIcon.classList.add('bg-emerald-600', 'text-white');
         activeIcon.classList.remove('bg-gray-100', 'text-gray-500');
-
         rows.forEach(row => {
             if (branchName === 'all' || row.getAttribute('data-branch') === branchName) {
                 row.classList.remove('hidden');
@@ -271,17 +263,14 @@
                 row.classList.add('hidden');
             }
         });
-
         title.innerText = branchName === 'all' ? "Đang hiển thị: Tất cả lớp học" : `Chi nhánh: ${branchName}`;
         noDataRow.classList.toggle('hidden', hasData);
     }
-
     function toggleModal(id) {
         const modal = document.getElementById(id);
         modal.classList.toggle('hidden');
         if (!modal.classList.contains('hidden')) modal.classList.add('flex');
     }
-
     function openEditClassModal(id, name, branchId, teacherId, price, duration, description) {
         const form = document.getElementById('editClassForm');
         form.action = `/admin-custom/classes/edit/${id}/`;
@@ -294,14 +283,12 @@
         document.getElementById('edit-description').value = description;
         toggleModal('editClassModal');
     }
-
     function formatPrices() {
         document.querySelectorAll('.price-format').forEach(el => {
             const p = el.getAttribute('data-price');
             if (p) el.innerText = new Intl.NumberFormat('en-US').format(p) + ' VNĐ';
         });
     }
-
     function sortClasses() {
         const v = document.getElementById('sortAdminClasses').value;
         if (!v) return;
@@ -314,7 +301,6 @@
         });
         rows.forEach(r => body.appendChild(r));
     }
-
     document.addEventListener('DOMContentLoaded', () => {
         formatPrices();
         lucide.createIcons();
