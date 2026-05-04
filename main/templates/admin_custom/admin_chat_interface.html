@@ -1,0 +1,464 @@
+{% extends 'admin_custom/base_admin.html' %}
+{% block admin_content %}
+<div class="h-[calc(100vh-8rem)] bg-white rounded-xl shadow-sm border border-gray-100 animate-fade-in overflow-hidden">
+    <div class="flex h-full">
+        <!-- Sidebar: Danh sách khách hàng -->
+        <div class="w-80 border-r border-gray-200 flex flex-col">
+            <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-[var(--primary-color)] to-[var(--primary-light)]">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="message-circle" class="w-5 h-5"></i>
+                    Chat với khách hàng
+                </h2>
+                <p class="text-white/80 text-xs mt-1">{{ customers.count }} khách hàng đang chat</p>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto">
+                {% for customer in customers %}
+                <div class="customer-item p-4 hover:bg-[var(--secondary-color)] cursor-pointer transition-all duration-200 border-b border-gray-100 {% if forloop.first %}bg-[var(--secondary-color)]{% endif %}"
+                     onclick="loadChat('{{ customer.email }}', '{{ customer.full_name|escapejs }}', this)">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--primary-color)] to-[var(--primary-light)] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            {{ customer.full_name.0|upper }}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start">
+                                <div class="font-semibold text-gray-900 truncate">{{ customer.full_name }}</div>
+                                <div class="text-xs text-gray-500">{{ customer.created_at|date:"H:i" }}</div>
+                            </div>
+                            <div class="text-sm text-gray-600 truncate mt-1">{{ customer.message }}</div>
+                            <div class="flex items-center gap-2 mt-2">
+                                {% if customer.unread_count > 0 %}
+                                    <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                        {{ customer.unread_count }} mới
+                                    </span>
+                                {% endif %}
+                                {% if customer.message_count > 1 %}
+                                    <span class="bg-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+                                        {{ customer.message_count }} tin
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-8 text-center text-gray-400">
+                    <i data-lucide="message-circle" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                    <p>Chưa có khách hàng nào nhắn tin</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Chat Window -->
+        <div class="flex-1 flex flex-col">
+            <!-- Chat Header -->
+            <div id="chatHeader" class="p-4 border-b border-gray-200 bg-gray-50 flex items-center gap-3">
+                <div id="chatAvatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--primary-color)] to-[var(--primary-light)] flex items-center justify-center text-white font-bold">
+                    <i data-lucide="message-circle" class="w-5 h-5"></i>
+                </div>
+                <div class="flex-1">
+                    <div id="chatName" class="font-semibold text-gray-900">Chọn khách hàng để bắt đầu chat</div>
+                    <div id="chatStatus" class="text-xs text-green-600">● Online</div>
+                </div>
+                <button onclick="clearCurrentChat()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="messagesArea" class="flex-1 overflow-y-auto p-4 bg-gray-50">
+                <div class="text-center text-gray-400 py-12">
+                    <i data-lucide="message-square" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+                    <p class="text-lg">Chọn một khách hàng để bắt đầu trò chuyện</p>
+                </div>
+            </div>
+
+            <!-- Message Input -->
+            <div id="messageInputArea" class="p-4 border-t border-gray-200 bg-white hidden">
+                <form id="messageForm" class="flex gap-3">
+                    <input type="hidden" id="currentCustomerEmail">
+                    <div class="flex-1">
+                        <textarea id="messageInput" 
+                                  class="w-full p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-[var(--primary-color)] focus:border-transparent outline-none"
+                                  placeholder="Nhập tin nhắn..."
+                                  rows="2"></textarea>
+                    </div>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-gradient-to-r from-[var(--primary-color)] to-[var(--primary-light)] text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center gap-2">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        Gửi
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentCustomer = null;
+let messages = [];
+
+
+function loadMessages(email) {
+    console.log('DEBUG: Loading messages for email:', email);
+    fetch(`/api/admin-chat/?email=${email}`)
+        .then(response => {
+            console.log('DEBUG: Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('DEBUG: Response data:', data);
+            messages = data.messages || [];
+            console.log('DEBUG: Updated messages array with', messages.length, 'messages');
+            
+            // Update chat header
+            document.getElementById('currentCustomerEmail').value = email;
+            document.getElementById('chatName').textContent = currentCustomer.name;
+            document.getElementById('chatAvatar').innerHTML = currentCustomer.name.charAt(0).toUpperCase();
+            
+            // Show message input area
+            document.getElementById('messageInputArea').classList.remove('hidden');
+            
+            console.log('DEBUG: Calling displayMessages()');
+            displayMessages();
+        })
+        .catch(error => {
+            console.error('DEBUG: Error loading messages:', error);
+        });
+}
+
+// Append a single message to admin chat
+function appendAdminMessage(messageData) {
+    console.log('Admin Chat: appendAdminMessage called with:', messageData);
+    
+    const messagesArea = document.getElementById('messagesArea');
+    if (!messagesArea) {
+        console.error('Admin Chat: Messages area not found');
+        return;
+    }
+    
+    console.log('Admin Chat: Messages area found, current messages count:', messages.length);
+    
+    // Remove empty state if this is the first message
+    if (messages.length === 0) {
+        messagesArea.innerHTML = '';
+        console.log('Admin Chat: Cleared empty state');
+    }
+    
+    // Add message to array
+    messages.push(messageData);
+    console.log('Admin Chat: Added message to array, new count:', messages.length);
+    
+    // Create message element
+    const isAdmin = messageData.sender === 'admin';
+    const bubbleClass = isAdmin ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-800';
+    const alignClass = isAdmin ? 'justify-end' : 'justify-start';
+    
+    console.log('Admin Chat: Creating message element, isAdmin:', isAdmin);
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `flex ${alignClass} mb-4`;
+    messageDiv.style.cssText = 'animation: slideInUp 0.3s ease;';
+    
+    messageDiv.innerHTML = `
+        <div class="max-w-xs lg:max-w-md">
+            <div class="${bubbleClass} rounded-2xl px-4 py-2 shadow-sm">
+                <p class="text-sm">${messageData.message}</p>
+            </div>
+            <p class="text-xs text-black mt-1 ${isAdmin ? 'text-right' : ''}">${messageData.timestamp}</p>
+        </div>
+    `;
+    
+    console.log('Admin Chat: Appending to DOM');
+    
+    // Append to container and scroll to bottom
+    messagesArea.appendChild(messageDiv);
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+    
+    console.log('Admin Chat: Message appended successfully, total messages in DOM:', messagesArea.children.length);
+}
+
+function displayMessages() {
+    const messagesArea = document.getElementById('messagesArea');
+    
+    if (messages.length === 0) {
+        messagesArea.innerHTML = `
+            <div class="text-center text-gray-400 py-8">
+                <p>Chưa có tin nhắn nào</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    messages.forEach(msg => {
+        const isAdmin = msg.sender === 'admin';
+        const bubbleClass = isAdmin ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-800';
+        const alignClass = isAdmin ? 'justify-end' : 'justify-start';
+        
+        html += `
+            <div class="flex ${alignClass} mb-4">
+                <div class="max-w-xs lg:max-w-md">
+                    <div class="${bubbleClass} rounded-2xl px-4 py-2 shadow-sm">
+                        <p class="text-sm">${msg.message}</p>
+                    </div>
+                    <p class="text-xs text-black mt-1 ${isAdmin ? 'text-right' : ''}">${msg.timestamp}</p>
+                </div>
+            </div>
+        `;
+    });
+    
+    messagesArea.innerHTML = html;
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+}
+
+function sendMessage() {
+    const messageInput = document.getElementById('messageInput');
+    const message = messageInput.value.trim();
+    
+    console.log('DEBUG: sendMessage called');
+    console.log('DEBUG: message:', message);
+    console.log('DEBUG: currentCustomer:', currentCustomer);
+    
+    if (!message || !currentCustomer) {
+        console.log('DEBUG: Missing message or currentCustomer');
+        return;
+    }
+    
+    const requestData = {
+        email: currentCustomer.email,
+        message: message
+    };
+    
+    console.log('DEBUG: Sending request to /api/admin-chat/ with data:', requestData);
+    
+    fetch('/api/admin-chat/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => {
+        console.log('DEBUG: Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('DEBUG: Response data:', data);
+        if (data.success) {
+            messageInput.value = '';
+            // Add message to local display immediately
+            messages.push({
+                sender: 'admin',
+                message: message,
+                timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+            });
+            displayMessages();
+        } else {
+            console.log('DEBUG: Error in response:', data.error);
+            alert('Lỗi: ' + (data.error || 'Không thể gửi tin nhắn'));
+        }
+    })
+    .catch(error => {
+        console.error('DEBUG: Error sending message:', error);
+        alert('Không thể gửi tin nhắn. Vui lòng thử lại.');
+    });
+}
+
+function clearCurrentChat() {
+    console.log('Admin Chat: clearCurrentChat called');
+    
+    currentCustomer = null;
+    messages = [];
+    console.log('Admin Chat: Cleared currentCustomer and messages array');
+    
+    document.getElementById('currentCustomerEmail').value = '';
+    document.getElementById('chatName').textContent = 'Chọn khách hàng để bắt đầu chat';
+    document.getElementById('chatAvatar').innerHTML = '<i data-lucide="message-circle" class="w-5 h-5"></i>';
+    document.getElementById('messageInputArea').classList.add('hidden');
+    document.getElementById('messagesArea').innerHTML = `
+        <div class="text-center text-gray-400 py-12">
+            <i data-lucide="message-square" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+            <p class="text-lg">Chọn một khách hàng để bắt đầu trò chuyện</p>
+        </div>
+    `;
+    
+    console.log('Admin Chat: Reset UI elements');
+    
+    // Remove active class from all customer items
+    document.querySelectorAll('.customer-item').forEach(item => {
+        item.classList.remove('bg-[var(--secondary-color)]');
+    });
+    
+    console.log('Admin Chat: Stopping polling');
+    stopAdminChatPolling();
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Polling for admin chat
+let adminChatPollingInterval = null;
+
+function startAdminChatPolling() {
+    console.log('Admin Chat: Starting chat polling...');
+    if (adminChatPollingInterval) {
+        clearInterval(adminChatPollingInterval);
+    }
+    
+    // Only start polling if a customer is selected
+    if (!currentCustomer || !currentCustomer.email) {
+        console.log('Admin Chat: Cannot start polling - no customer selected');
+        return;
+    }
+    
+    console.log('Admin Chat: Starting polling for', currentCustomer.email);
+    
+    // Poll every 2 seconds for new messages
+    adminChatPollingInterval = setInterval(async () => {
+        if (!currentCustomer || !currentCustomer.email) {
+            console.log('Admin Chat: No customer selected, skipping polling');
+            return;
+        }
+        
+        console.log('Admin Chat: Polling for messages from', currentCustomer.email);
+        
+        try {
+            const response = await fetch(`/api/admin-chat/?email=${encodeURIComponent(currentCustomer.email)}`);
+            console.log('Admin Chat: API response status:', response.status);
+            
+            const data = await response.json();
+            console.log('Admin Chat: API response data:', data);
+            
+            if (data.messages && data.messages.length > 0) {
+                // Check if we have new messages by comparing with current messages array
+                const currentMessageCount = messages.length;
+                console.log('Admin Chat: Current messages in array:', currentMessageCount, 'API messages:', data.messages.length);
+                
+                if (data.messages.length > currentMessageCount) {
+                    console.log('Admin Chat: New messages detected, appending...');
+                    console.log('Admin Chat: Current messages:', currentMessageCount, 'New messages:', data.messages.length);
+                    
+                    // Only append new messages instead of reloading all
+                    const newMessages = data.messages.slice(currentMessageCount);
+                    console.log('Admin Chat: New messages to append:', newMessages);
+                    newMessages.forEach(msg => {
+                        console.log('Admin Chat: Appending message:', msg);
+                        appendAdminMessage(msg);
+                    });
+                } else {
+                    console.log('Admin Chat: No new messages');
+                }
+            } else {
+                console.log('Admin Chat: No messages in API response');
+            }
+        } catch (error) {
+            console.error('Admin Chat: Polling error:', error);
+        }
+    }, 1000); // Check every 1 second for faster response
+    
+    console.log('Admin Chat: Chat polling started successfully for', currentCustomer.email);
+}
+
+function stopAdminChatPolling() {
+    if (adminChatPollingInterval) {
+        clearInterval(adminChatPollingInterval);
+        adminChatPollingInterval = null;
+        console.log('Admin Chat: Polling stopped');
+    }
+}
+
+// Update online/offline status
+function updateOnlineStatus(email) {
+    const statusElement = document.getElementById('chatStatus');
+    if (!statusElement) return;
+    
+    console.log('Admin Chat: Updating online status for', email);
+    
+    // Call API to get last message time
+    fetch(`/api/customer-status/?email=${encodeURIComponent(email)}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Admin Chat: Customer status data:', data);
+            
+            if (data.is_online) {
+                statusElement.innerHTML = '● Online';
+                statusElement.className = 'text-xs text-green-600';
+            } else {
+                const lastSeen = data.last_seen ? new Date(data.last_seen).toLocaleString('vi-VN') : 'Chưa có hoạt động';
+                statusElement.innerHTML = `● Offline - Lần cuối: ${lastSeen}`;
+                statusElement.className = 'text-xs text-gray-500';
+            }
+        })
+        .catch(error => {
+            console.error('Admin Chat: Error getting customer status:', error);
+            statusElement.innerHTML = '● Unknown';
+            statusElement.className = 'text-xs text-gray-400';
+        });
+}
+
+// Update loadChat function to handle polling
+function loadChat(email, name, element) {
+    console.log('Admin Chat: loadChat called for', email, name);
+    
+    // Remove active class from all customer items
+    document.querySelectorAll('.customer-item').forEach(item => {
+        item.classList.remove('bg-[var(--secondary-color)]');
+    });
+    
+    // Add active class to selected customer
+    element.classList.add('bg-[var(--secondary-color)]');
+    currentCustomer = { email, name };
+    
+    console.log('Admin Chat: Set currentCustomer to', currentCustomer);
+    
+    // Stop previous polling and start new one
+    console.log('Admin Chat: Stopping previous polling');
+    stopAdminChatPolling();
+    
+    // Load messages
+    console.log('Admin Chat: Loading messages');
+    loadMessages(email);
+    
+    // Update online status
+    updateOnlineStatus(email);
+    
+    // Start polling for this customer
+    console.log('Admin Chat: Starting polling');
+    startAdminChatPolling();
+}
+
+// Event listeners
+document.getElementById('messageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    sendMessage();
+});
+
+// Auto-resize textarea
+document.getElementById('messageInput').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+// Initialize Lucide icons
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+});
+</script>
+{% endblock %}

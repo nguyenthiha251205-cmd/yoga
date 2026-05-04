@@ -21,9 +21,9 @@
 <div id="header-root"></div>
 <main class="pt-44 md:pt-40 pb-12">
     <div class="container mx-auto px-4">
-        <div class="text-center mb-16">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4 text-[var(--text-dark)]">Liên Hệ SoraYoga</h1>
-            <div class="w-20 h-1 bg-[var(--primary-color)] mx-auto mb-6"></div>
+        <div class="text-center mb-16 animate-fade-in">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[var(--text-dark)] via-[var(--primary-color)] to-[var(--primary-light)] bg-clip-text text-transparent section-title">Liên Hệ SoraYoga</h1>
+            <div class="w-20 h-1 bg-gradient-to-r from-[var(--primary-color)] to-[var(--accent-color)] mx-auto mb-6 rounded-full section-divider"></div>
             <p class="text-lg text-[var(--text-light)] max-w-2xl mx-auto">
                 Chúng tôi luôn sẵn sàng lắng nghe và đồng hành cùng bạn trên hành trình chinh phục sức khỏe và sự bình an.
             </p>
@@ -47,84 +47,99 @@
             </div>
         {% endif %}
         <div class="grid lg:grid-cols-2 gap-12 items-start max-w-6xl mx-auto">
-            <div class="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-gray-100 space-y-8">
+            <div class="bg-gradient-to-br from-white to-[var(--secondary-color)] p-8 md:p-10 rounded-3xl shadow-lg border border-gray-50 space-y-8 sora-card animate-slide-in-left">
                 <div>
-                    <h2 class="text-2xl font-bold mb-6 text-[var(--text-dark)]">Thông tin kết nối</h2>
+                    <h2 class="text-2xl font-bold mb-6 bg-gradient-to-r from-[var(--text-dark)] to-[var(--primary-color)] bg-clip-text text-transparent">Thông tin kết nối</h2>
                     <div class="space-y-6">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 bg-[var(--secondary-color)] rounded-full flex items-center justify-center text-[var(--primary-color)] flex-shrink-0">
+                        <div class="flex items-start gap-4 group hover-lift">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[var(--secondary-color)] to-white flex items-center justify-center text-[var(--primary-color)] flex-shrink-0 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 shadow-lg">
                                 <i class="lucide-map-pin">📍</i>
                             </div>
                             <div>
-                                <h4 class="font-bold text-sm uppercase text-[var(--text-light)]">Địa chỉ</h4>
-                                <p>Xem ở bản đồ bên dưới</p>
+                                <h4 class="font-bold text-sm uppercase text-[var(--text-light)] group-hover:text-[var(--primary-color)] transition-colors duration-300">Địa chỉ</h4>
+                                <p class="text-gray-600">Xem ở bản đồ bên dưới</p>
                             </div>
                         </div>
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 bg-[var(--secondary-color)] rounded-full flex items-center justify-center text-[var(--primary-color)] flex-shrink-0">
+                        <div class="flex items-start gap-4 group hover-lift">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[var(--secondary-color)] to-white flex items-center justify-center text-[var(--primary-color)] flex-shrink-0 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 shadow-lg">
                                 <i class="lucide-phone">📞</i>
                             </div>
                             <div>
-                                <h4 class="font-bold text-sm uppercase text-[var(--text-light)]">Hotline hỗ trợ</h4>
-                                <a href="tel:+84979393979" class="text-lg font-semibold hover:text-[var(--primary-color)]">+84 979 393 979</a>
+                                <h4 class="font-bold text-sm uppercase text-[var(--text-light)] group-hover:text-[var(--primary-color)] transition-colors duration-300">Hotline hỗ trợ</h4>
+                                <a href="tel:+84979393979" class="text-lg font-semibold hover:text-[var(--primary-color)] transition-colors duration-300">+84 979 393 979</a>
                             </div>
                         </div>
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 bg-[var(--secondary-color)] rounded-full flex items-center justify-center text-[var(--primary-color)] flex-shrink-0">
+                        <div class="flex items-start gap-4 group hover-lift">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[var(--secondary-color)] to-white flex items-center justify-center text-[var(--primary-color)] flex-shrink-0 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 shadow-lg">
                                 <i class="lucide-mail">📧</i>
                             </div>
                             <div>
-                                <h4 class="font-bold text-sm uppercase text-[var(--text-light)]">Email tư vấn</h4>
-                                <p>info@sorayoga.runasp.net</p>
+                                <h4 class="font-bold text-sm uppercase text-[var(--text-light)] group-hover:text-[var(--primary-color)] transition-colors duration-300">Email tư vấn</h4>
+                                <p class="text-gray-600">info@sorayoga.runasp.net</p>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="pt-6 border-t border-gray-100">
-                    <h3 class="text-xl font-bold mb-4">Dịch vụ bạn có thể quan tâm</h3>
+                    <h3 class="text-xl font-bold mb-4 bg-gradient-to-r from-[var(--text-dark)] to-[var(--primary-color)] bg-clip-text text-transparent">Dịch vụ bạn có thể quan tâm</h3>
                     <div class="flex flex-wrap gap-2">
-                        <span class="bg-[var(--bg-light)] px-4 py-2 rounded-full text-sm font-medium border border-[var(--secondary-color)]">Hatha Yoga</span>
-                        <span class="bg-[var(--bg-light)] px-4 py-2 rounded-full text-sm font-medium border border-[var(--secondary-color)]">Vinyasa Flow</span>
-                        <span class="bg-[var(--bg-light)] px-4 py-2 rounded-full text-sm font-medium border border-[var(--secondary-color)]">Yin Yoga</span>
-                        <span class="bg-[var(--bg-light)] px-4 py-2 rounded-full text-sm font-medium border border-[var(--secondary-color)]">Thiền định</span>
+                        <span class="bg-gradient-to-r from-[var(--bg-light)] to-[var(--secondary-color)] px-4 py-2 rounded-full text-sm font-medium border border-[var(--primary-color)] hover:border-[var(--primary-color)] hover:bg-[var(--primary-color)] hover:text-white transition-all duration-300 cursor-pointer hover-lift">Hatha Yoga</span>
+                        <span class="bg-gradient-to-r from-[var(--bg-light)] to-[var(--secondary-color)] px-4 py-2 rounded-full text-sm font-medium border border-[var(--primary-color)] hover:border-[var(--primary-color)] hover:bg-[var(--primary-color)] hover:text-white transition-all duration-300 cursor-pointer hover-lift">Vinyasa Flow</span>
+                        <span class="bg-gradient-to-r from-[var(--bg-light)] to-[var(--secondary-color)] px-4 py-2 rounded-full text-sm font-medium border border-[var(--primary-color)] hover:border-[var(--primary-color)] hover:bg-[var(--primary-color)] hover:text-white transition-all duration-300 cursor-pointer hover-lift">Yin Yoga</span>
+                        <span class="bg-gradient-to-r from-[var(--bg-light)] to-[var(--secondary-color)] px-4 py-2 rounded-full text-sm font-medium border border-[var(--primary-color)] hover:border-[var(--primary-color)] hover:bg-[var(--primary-color)] hover:text-white transition-all duration-300 cursor-pointer hover-lift">Thiền định</span>
                     </div>
                 </div>
             </div>
-            <div class="bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-gray-50 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-[var(--secondary-color)] rounded-full -mr-16 -mt-16 opacity-50"></div>
-                <h2 class="text-2xl font-bold mb-6 text-[var(--text-dark)]">Gửi lời nhắn cho Sora</h2>
-                <form action="{% url 'contact' %}" method="post" class="space-y-5 relative z-10">
-                    {% csrf_token %}
-                    <div>
-                        <label class="block mb-2 font-semibold text-sm">Họ và tên của bạn</label>
-                        <input type="text" name="name" required placeholder="Nguyễn Văn A" class="form-input">
+            <div class="bg-gradient-to-br from-white to-[var(--secondary-color)] p-8 md:p-10 rounded-3xl shadow-xl border border-gray-50 relative overflow-hidden sora-card animate-slide-in-right">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[var(--primary-color)] to-[var(--accent-color)] rounded-full -mr-16 -mt-16 opacity-20 animate-float"></div>
+            <h2 class="text-2xl font-bold mb-6 bg-gradient-to-r from-[var(--text-dark)] to-[var(--primary-color)] bg-clip-text text-transparent">Thông tin liên hệ nhanh</h2>
+            
+            <div class="space-y-6 relative z-10">
+                <!-- Hotline -->
+                <div class="flex items-start gap-4 p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-emerald-100 hover:bg-white/80 transition-all group">
+                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="phone" class="w-6 h-6"></i>
                     </div>
-                    <div>
-                        <label class="block mb-2 font-semibold text-sm">Địa chỉ Email</label>
-                        <input type="email" name="email" required placeholder="email@gmail.com" class="form-input">
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-900 mb-1">Hotline</h3>
+                        <p class="text-emerald-600 font-semibold text-lg">0979 393 979</p>
+                        <p class="text-sm text-gray-600">Hỗ trợ 24/7</p>
                     </div>
-                    <div>
-                        <label class="block mb-2 font-semibold text-sm">Tiêu đề</label>
-                        <input type="text" name="subject" required placeholder="Hỏi về lịch tập, học phí..." class="form-input">
+                </div>
+
+                <!-- Email -->
+                <div class="flex items-start gap-4 p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-emerald-100 hover:bg-white/80 transition-all group">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="mail" class="w-6 h-6"></i>
                     </div>
-                    <div>
-                        <label class="block mb-2 font-semibold text-sm">Lời nhắn hoặc yêu cầu tư vấn</label>
-                        <textarea name="message" rows="4" required placeholder="Tôi muốn đăng ký học thử lớp Hatha..." class="form-input"></textarea>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-900 mb-1">Email</h3>
+                        <p class="text-blue-600 font-semibold">sorayoga2005@gmail.vn</p>
+                        <p class="text-sm text-gray-600">Phản hồi trong 2h</p>
                     </div>
-                    <button type="submit" class="btn-primary w-full shadow-lg shadow-[#7C9885]/20">
-                        Gửi Yêu Cầu Ngay
-                    </button>
-                </form>
-            </div>
+                </div>
+
+                <!-- Địa chỉ -->
+                <div class="flex items-start gap-4 p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-emerald-100 hover:bg-white/80 transition-all group">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="map-pin" class="w-6 h-6"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-900 mb-1">Trụ sở chính</h3>
+                        <p class="text-purple-600 font-semibold">Xuân Thới Thượng 1, Xã Bà Điểm</p>
+                        <p class="text-sm text-gray-600">TP. Hồ Chí Minh (8:00 - 21:30)</p>
+                    </div>
+                </div>
+
+                
+                            </div>
         </div>
-        <div class="mt-20 max-w-6xl mx-auto">
-            <div class="rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
-                <div class="mt-20 max-w-6xl mx-auto">
-                    <div class="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
-                        <h2 class="text-3xl font-bold mb-6 text-center text-[var(--text-dark)]">Hệ Thống Chi Nhánh SoraYoga</h2>
-                        <div id="gis-root"></div> 
-                    </div>
-                </div>
+        </div>
+        <div class="mt-20 max-w-6xl mx-auto animate-fade-in">
+            <div class="bg-gradient-to-br from-white to-[var(--secondary-color)] p-8 rounded-3xl shadow-2xl border-8 border-white sora-card">
+                <h2 class="text-3xl md:text-4xl font-bold mb-6 text-center bg-gradient-to-r from-[var(--text-dark)] via-[var(--primary-color)] to-[var(--primary-light)] bg-clip-text text-transparent section-title">Hệ Thống Chi Nhánh SoraYoga</h2>
+                <div className="w-20 h-1 bg-gradient-to-r from-[var(--primary-color)] to-[var(--accent-color)] mx-auto mb-6 rounded-full section-divider"></div>
+                <div id="gis-root" className="animate-scale-in"></div> 
             </div>
         </div>
     </div>
@@ -135,7 +150,6 @@
     <script>
         window.allBranches = {{ branches_json|safe }};
     </script>
-    <script src="{% static 'components/BranchData.js' %}"></script>
     <script type="text/babel" src="{% static 'components/Header.js' %}"></script>
     <script type="text/babel" src="{% static 'components/Footer.js' %}"></script>
     <script type="text/babel" src="{% static 'components/BranchFinder.js' %}"></script>
